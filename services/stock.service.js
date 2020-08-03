@@ -55,7 +55,7 @@ module.exports = class StockService {
       buy_date:getValueToStore(buyDate),
       buy_person_id:getValueToStore(buyPersonId),
       buy_transaction_id:getValueToStore(transactionId),
-      status:getValueToStore('in-stock'),
+      status:getValueToStore('current-stock'),
       sell_price:getValueToStore(sellPrice),
       sell_date:getValueToStore(sellDate),
       sell_person_id:null,
@@ -189,7 +189,7 @@ module.exports = class StockService {
         historyNote+= `note updated`
         updateObj.note = note;
       }
-      if(status !== 'in-sell'){
+      if(status !== 'jangad'){
         if(addTransactionObj === true){
           const transactionObj={
             uuid:uuidv4(),

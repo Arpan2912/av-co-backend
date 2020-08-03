@@ -65,7 +65,9 @@ module.exports = {
            upper(mobile1) like upper(:search) or
            upper(mobile2) like upper(:search) 
        else true end
-    )`;
+    )
+     order by name asc
+    `;
     if (replacement.download_excel === false) {
       q += `offset :offset limit :limit `;
     }
@@ -138,7 +140,7 @@ module.exports = {
     let q = `select s.uuid as uuid,stock_id,
     buy_price,buy_date,cb.name,cb.uuid as buy_person_id,
     buy_transaction_id,status,sell_price,sell_date,cs.name,cs.uuid as sell_person_id,
-    sell_transaction_id,note
+    sell_transaction_id,note,s.updated_at
     from stocks  as s
     left join contacts as cb on cb.id=s.buy_person_id
     left join contacts as cs on cs.id=s.sell_person_id
@@ -151,9 +153,10 @@ module.exports = {
          upper(cb.name) like upper(:search) or
          upper(cs.name) like upper(:search)
        else true end
-    )`;
+    )
+    order by s.updated_at desc`;
     if (replacement.download_excel === false) {
-      q += `offset :offset limit :limit `;
+      q += ` offset :offset limit :limit `;
     }
     return q;
   },
@@ -166,6 +169,7 @@ module.exports = {
     case 
       when :is_search 
       then upper(stock_id) like upper(:search) or
+      upper(status) like upper(:search) or
        upper(cb.name) like upper(:search) or
        upper(cs.name) like upper(:search)
      else true end
@@ -218,7 +222,7 @@ module.exports = {
     }, 
     getTransactions: replacement => {
       let q = `select t.uuid as uuid,
-      c.uuid as person_id,c.name as name,transaction_date,credit,debit,mode,note
+      c.uuid as person_id,c.name as name,transaction_date,credit,debit,mode,note,t.updated_at
       from transactions  as t
       left join contacts as c on c.id=t.person_id
       where 
@@ -232,9 +236,10 @@ module.exports = {
          else true end
       ) and 
       case when :person_id is not null then person_id=:person_id else true end
+      order by t.updated_at desc
       `;
       if (replacement.download_excel === false) {
-        q += `offset :offset limit :limit `;
+        q += ` offset :offset limit :limit `;
       }
       return q;
     },
