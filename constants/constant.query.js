@@ -138,8 +138,8 @@ module.exports = {
   
   getStocks: replacement => {
     let q = `select s.uuid as uuid,stock_id,
-    buy_price,buy_date,cb.name,cb.uuid as buy_person_id,
-    buy_transaction_id,status,sell_price,sell_date,cs.name,cs.uuid as sell_person_id,
+    buy_price,buy_date,cb.name as buy_person_name,cb.uuid as buy_person_id,
+    buy_transaction_id,status,sell_price,sell_date,cs.name as sell_person_name,cs.uuid as sell_person_id,
     sell_transaction_id,note,s.updated_at
     from stocks  as s
     left join contacts as cb on cb.id=s.buy_person_id
@@ -312,7 +312,7 @@ module.exports = {
       string_agg(stock_id,',') as stones
       from stocks 
       inner join contacts on sell_person_id=contacts.id
-      where status ='in-sell' 
+      where status ='jangad' 
       and (
         case 
           when :is_search 
@@ -327,7 +327,7 @@ module.exports = {
     getStockAndAmountWithDalalCount: `
       select count(distinct contacts.uuid) from stocks
       inner join contacts on sell_person_id=contacts.id
-      where status ='in-sell' 
+      where status ='jangad' 
       and (
         case 
           when :is_search 
