@@ -291,12 +291,14 @@ module.exports = {
 
     getFinalAmountForDate: `
       with transaction_data as (
-        select sum(coalesce(credit,0)-coalesce(debit,0)) as transaction  from transactions where date(transaction_date)=:date
+        select sum(coalesce(credit,0)-coalesce(debit,0)) as transaction  
+        from transactions where date(transaction_date)=:date
+        and mode='cash'
       ),
       opening_balance_data as (
         select amount as opening_balance from opening_balance where date(date) =:date
       )
-      select opening_balance as "openingBalance", opening_balance+transaction as "total" from transaction_data inner join opening_balance_data on true
+      select opening_balance as "openingBalance", coalesce(opening_balance::integer,0)+coalesce(transaction::integer,0) as "total" from transaction_data inner join opening_balance_data on true
     `,
     getStockAndAmountWithDalal:`
       select 
@@ -330,7 +332,7 @@ module.exports = {
     `
     ,
     getAccountSummary:`
-      select c.name,c.uuid,sum(coalesce(credit,0)) as credit,sum(coalesce(debit,0)) as debit,sum(coalesce(credit,0)-coalesce(debit,0)) as total from transactions as t 
+      select c.name,c.uuid,sum(coalesce(credit,0)) as credit,sum(coalesce(debit,0)) as debit,sum(coalesce(debit,0)-coalesce(credit,0)) as total from transactions as t 
       inner join contacts as c on t.person_id=c.id 
       where  
         case 
@@ -344,8 +346,8 @@ module.exports = {
     `,
 
     getAccountSummaryCount: `
-      select count(distinct contacts.uuid) from stocks
-      inner join contacts on sell_person_id=contacts.id
+      select count(distinct contacts.uuid) from transactions
+      inner join contacts on person_id=contacts.id
       where  
         case 
           when :is_search 

@@ -29,12 +29,12 @@ module.exports = class StockService {
       contactDetail = await DbService.getIdFromUuid(contactObj, "contact");
       buyPersonId = contactDetail[0].id;
     }
-
+    let transactionId = null;
     const transactionObj={
       uuid:uuidv4(),
       person_id:buyPersonId,
-      debit:buyPrice,
-      credit:0,
+      debit:0,
+      credit:buyPrice,
       note,
       mode:'stock',
       transaction_date:new Date().toISOString(),
@@ -46,7 +46,7 @@ module.exports = class StockService {
       updated_by:id
     }
 
-    let transactionId = await TransactionService.addTransaction(transactionObj);
+    transactionId = await TransactionService.addTransaction(transactionObj);
 
     const obj = {
       uuid: uuidv4(),
@@ -189,59 +189,63 @@ module.exports = class StockService {
         historyNote+= `note updated`
         updateObj.note = note;
       }
-      if(addTransactionObj === true){
-        const transactionObj={
-          uuid:uuidv4(),
-          person_id:sellPersonId,
-          credit:sellPrice,
-          debit:0,
-          note,
-          mode: 'stock',
-          transaction_date:new Date().toISOString(),
-          is_active:true,
-          is_deleted:false,
-          created_at:new Date().toISOString(),
-          updated_at:new Date().toISOString(),
-          created_by:id,
-          updated_by:id
-        }
-        transactionId = await TransactionService.addTransaction(transactionObj);
-      } else if(updateTransactionObj === true){
+      if(status !== 'in-sell'){
+        if(addTransactionObj === true){
+          const transactionObj={
+            uuid:uuidv4(),
+            person_id:sellPersonId,
+            credit:0,
+            debit:sellPrice,
+            note,
+            mode: 'stock',
+            transaction_date:new Date().toISOString(),
+            is_active:true,
+            is_deleted:false,
+            created_at:new Date().toISOString(),
+            updated_at:new Date().toISOString(),
+            created_by:id,
+            updated_by:id
+          }
+          transactionId = await TransactionService.addTransaction(transactionObj);
+        } else if(updateTransactionObj === true){
 
-        let updateBuyTransactionObj={
-          updated_at:new Date().toISOString(),
-          updated_by:id
-        }
+          let updateBuyTransactionObj={
+            updated_at:new Date().toISOString(),
+            updated_by:id
+          }
 
-        let updateSellTransactionObj={
-          updated_at:new Date().toISOString(),
-          updated_by:id
-        }
+          let updateSellTransactionObj={
+            updated_at:new Date().toISOString(),
+            updated_by:id
+          }
 
-        if(buyPrice && stockDetail.buy_price !== buyPrice){
-         updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
-         updateBuyTransactionObj.debit=buyPrice;
-        }
-
-        if(buyPersonId && stockDetail.buy_person_id !== buyPersonId){
+          if(buyPrice && stockDetail.buy_price !== buyPrice){
           updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
-          updateBuyTransactionObj.person_id=buyPersonId;
-         }
+          updateBuyTransactionObj.credit=buyPrice;
+          updateBuyTransactionObj.debit=0;
+          }
 
-        if(sellPrice && stockDetail.sell_price !== sellPrice){
-          updateSellTransactionObj.id=stockDetail.sell_transaction_id;
-          updateSellTransactionObj.credit=sellPrice;
-         }
+          if(buyPersonId && stockDetail.buy_person_id !== buyPersonId){
+            updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
+            updateBuyTransactionObj.person_id=buyPersonId;
+          }
 
-         if(sellPersonId && stockDetail.sell_person_id !== sellPersonId){
-          updateSellTransactionObj.id=stockDetail.sell_transaction_id;
-          updateSellTransactionObj.person_id=sellPersonId;
-         }
-         if(updateBuyTransactionObj.id){
-           await TransactionService.updateTransaction(updateBuyTransactionObj)
-         }
-         if(updateSellTransactionObj.id){
-          await TransactionService.updateTransaction(updateSellTransactionObj)
+          if(sellPrice && stockDetail.sell_price !== sellPrice){
+            updateSellTransactionObj.id=stockDetail.sell_transaction_id;
+            updateSellTransactionObj.debit=sellPrice;
+            updateSellTransactionObj.credit=0;
+          }
+
+          if(sellPersonId && stockDetail.sell_person_id !== sellPersonId){
+            updateSellTransactionObj.id=stockDetail.sell_transaction_id;
+            updateSellTransactionObj.person_id=sellPersonId;
+          }
+          if(updateBuyTransactionObj.id){
+            await TransactionService.updateTransaction(updateBuyTransactionObj)
+          }
+          if(updateSellTransactionObj.id){
+            await TransactionService.updateTransaction(updateSellTransactionObj)
+          }
         }
       }
       if(transactionId){

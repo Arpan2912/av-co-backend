@@ -263,7 +263,6 @@ module.exports = class TransactionService {
     }
     const finalAmountDbResponse = await DbService.getFinalAmountForDate(replacementObj);
     if(finalAmountDbResponse && finalAmountDbResponse[0]){
-      console.log("finalAmountDbResponse[0]",finalAmountDbResponse[0]);
       return finalAmountDbResponse[0]
     } else {
       return null

@@ -1,0 +1,664 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 10.8 (Ubuntu 10.8-1.pgdg18.04+1)
+-- Dumped by pg_dump version 10.8 (Ubuntu 10.8-1.pgdg18.04+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: SequelizeMeta; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public."SequelizeMeta" (
+    name character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public."SequelizeMeta" OWNER TO arpan;
+
+--
+-- Name: contacts; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.contacts (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    email character varying(255),
+    mobile1 character varying(255),
+    mobile2 character varying(255),
+    address character varying(255),
+    city character varying(255),
+    company character varying(255),
+    type character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.contacts OWNER TO arpan;
+
+--
+-- Name: contacts_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.contacts_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contacts_id_seq OWNER TO arpan;
+
+--
+-- Name: contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.contacts_id_seq OWNED BY public.contacts.id;
+
+
+--
+-- Name: opening_balance; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.opening_balance (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    date timestamp with time zone NOT NULL,
+    amount integer,
+    note character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.opening_balance OWNER TO arpan;
+
+--
+-- Name: opening_balance_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.opening_balance_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.opening_balance_id_seq OWNER TO arpan;
+
+--
+-- Name: opening_balance_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.opening_balance_id_seq OWNED BY public.opening_balance.id;
+
+
+--
+-- Name: stock_history; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.stock_history (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    stock_id integer NOT NULL,
+    action character varying(255) NOT NULL,
+    action_date character varying(255),
+    person_id integer,
+    note character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.stock_history OWNER TO arpan;
+
+--
+-- Name: stock_history_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.stock_history_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.stock_history_id_seq OWNER TO arpan;
+
+--
+-- Name: stock_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.stock_history_id_seq OWNED BY public.stock_history.id;
+
+
+--
+-- Name: stocks; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.stocks (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    stock_id character varying(255) NOT NULL,
+    buy_price character varying(255),
+    buy_date timestamp with time zone,
+    buy_person_id integer,
+    buy_transaction_id integer,
+    status character varying(255),
+    sell_price character varying(255),
+    sell_date timestamp with time zone,
+    sell_person_id integer,
+    sell_transaction_id integer,
+    note character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.stocks OWNER TO arpan;
+
+--
+-- Name: stocks_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.stocks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.stocks_id_seq OWNER TO arpan;
+
+--
+-- Name: stocks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.stocks_id_seq OWNED BY public.stocks.id;
+
+
+--
+-- Name: transaction_history; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.transaction_history (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    action character varying(255) NOT NULL,
+    action_date character varying(255),
+    person_id integer,
+    note character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.transaction_history OWNER TO arpan;
+
+--
+-- Name: transaction_history_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.transaction_history_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.transaction_history_id_seq OWNER TO arpan;
+
+--
+-- Name: transaction_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.transaction_history_id_seq OWNED BY public.transaction_history.id;
+
+
+--
+-- Name: transactions; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.transactions (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    person_id integer,
+    transaction_date timestamp with time zone,
+    credit integer,
+    debit integer,
+    mode character varying(255) NOT NULL,
+    note character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    created_by integer,
+    updated_by integer,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.transactions OWNER TO arpan;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.transactions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.transactions_id_seq OWNER TO arpan;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.transactions_id_seq OWNED BY public.transactions.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: arpan
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    uuid uuid NOT NULL,
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    phone character varying(255),
+    password character varying(255),
+    user_type character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL,
+    last_login timestamp with time zone,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO arpan;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: arpan
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO arpan;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: arpan
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: contacts id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.contacts ALTER COLUMN id SET DEFAULT nextval('public.contacts_id_seq'::regclass);
+
+
+--
+-- Name: opening_balance id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.opening_balance ALTER COLUMN id SET DEFAULT nextval('public.opening_balance_id_seq'::regclass);
+
+
+--
+-- Name: stock_history id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.stock_history ALTER COLUMN id SET DEFAULT nextval('public.stock_history_id_seq'::regclass);
+
+
+--
+-- Name: stocks id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.stocks ALTER COLUMN id SET DEFAULT nextval('public.stocks_id_seq'::regclass);
+
+
+--
+-- Name: transaction_history id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.transaction_history ALTER COLUMN id SET DEFAULT nextval('public.transaction_history_id_seq'::regclass);
+
+
+--
+-- Name: transactions id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.transactions ALTER COLUMN id SET DEFAULT nextval('public.transactions_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: SequelizeMeta; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public."SequelizeMeta" (name) FROM stdin;
+20190610173110-create-user.js
+20191215071632-contacts.js
+20200523082625-stocks.js
+20200523082703-transactions.js
+20200523084328-stock_history.js
+20200523084336-transaction_history.js
+20200719084856-opening_balance.js
+\.
+
+
+--
+-- Data for Name: contacts; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.contacts (id, uuid, name, email, mobile1, mobile2, address, city, company, type, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+1	408f4bba-7a3a-418e-a870-3c06865e168c	Arpan Shah	\N	9033340163	\N	\N	\N	\N	dalal	t	f	1	1	2020-08-02 20:11:01.77+05:30	2020-08-02 20:11:01.77+05:30
+2	9b3c7ba4-8a63-4fee-8d6a-4154df82f2b7	Parth Shah	\N	48654864	\N	\N	\N	\N	dalal	t	f	1	1	2020-08-02 20:11:17.844+05:30	2020-08-02 20:11:17.844+05:30
+3	be35bff7-3497-4424-89f8-1b98c2a808ad	Abhay Shah	\N	7405111385	\N	\N	\N	\N	dalal	t	f	1	1	2020-08-02 20:11:33.86+05:30	2020-08-02 20:11:33.86+05:30
+4	86edc52f-bfb8-48dc-8929-dee50a34f444	Rahil Shah	\N	9408754755	\N	\N	\N	\N	dalal	t	f	1	1	2020-08-02 20:11:54.31+05:30	2020-08-02 20:11:54.31+05:30
+5	e1cafcb0-9667-4fef-bfff-cdde6f63b558	Ankit Shah	\N	9898989	\N	\N	\N	\N	dalal	t	f	1	1	2020-08-02 20:12:41.529+05:30	2020-08-02 20:12:41.529+05:30
+6	a97212f3-6260-4fca-9208-b88ca2cac368	Vijay Shah	\N	4561321	\N	\N	\N	\N	buyer	t	f	1	1	2020-08-02 20:12:56.536+05:30	2020-08-02 20:12:56.536+05:30
+7	96d1bded-f94f-4544-af7f-2bd859b36ff1	Veer Shah	\N	46545465	\N	\N	\N	\N	buyer	t	f	1	1	2020-08-02 20:13:11.457+05:30	2020-08-02 20:13:34.252+05:30
+8	81d2c11e-9b31-45e5-a226-1a7aed38f826	Vitrag Shah	\N	45454132	\N	\N	\N	\N	buyer	t	f	1	1	2020-08-02 20:13:24.058+05:30	2020-08-02 20:13:43.475+05:30
+9	c888a1fa-b483-41e6-9c3e-6a04f9bda023	Ketul Shah	\N	3324534	\N	\N	\N	\N	seller	t	f	1	1	2020-08-02 20:14:02.283+05:30	2020-08-02 20:14:02.283+05:30
+10	765f1bf7-41fd-44fa-9409-87f94297df21	Mahesh Shah	\N	54656546	\N	\N	\N	\N	seller	t	f	1	1	2020-08-02 20:14:20.957+05:30	2020-08-02 20:14:20.957+05:30
+11	f02d24f4-6208-45d2-8419-2254484d8423	Moxesh Shah	\N	3165454	\N	\N	\N	\N	seller	t	f	1	1	2020-08-02 20:14:38.151+05:30	2020-08-02 20:14:38.151+05:30
+\.
+
+
+--
+-- Data for Name: opening_balance; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.opening_balance (id, uuid, date, amount, note, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+1	7ce07bc4-b5bc-47cf-89ed-d65467d58935	2020-08-02 05:30:00+05:30	20000	\N	t	f	1	1	2020-08-02 20:21:07.566+05:30	2020-08-02 20:21:07.566+05:30
+\.
+
+
+--
+-- Data for Name: stock_history; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.stock_history (id, uuid, stock_id, action, action_date, person_id, note, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+1	c1c40858-5e2d-4a89-807d-ffbc233e267d	1	add	2020-08-02T14:45:08.224Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 1000	t	f	1	1	2020-08-02 20:15:08.224+05:30	2020-08-02 20:15:08.224+05:30
+2	a642342b-38a9-41d0-a1d3-bc879e7dae30	2	add	2020-08-02T14:45:42.620Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 2000	t	f	1	1	2020-08-02 20:15:42.62+05:30	2020-08-02 20:15:42.62+05:30
+3	a228bc75-7f97-4062-b8fe-5dea3976a41f	3	add	2020-08-02T14:46:14.477Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 3000	t	f	1	1	2020-08-02 20:16:14.477+05:30	2020-08-02 20:16:14.477+05:30
+4	3d6f37cf-7cec-4dc6-9c73-f76a89b046c6	4	add	2020-08-02T14:46:29.852Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 4000	t	f	1	1	2020-08-02 20:16:29.852+05:30	2020-08-02 20:16:29.852+05:30
+5	15037725-7c7a-4699-bc70-8ec87a57356d	5	add	2020-08-02T14:46:44.376Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 3000	t	f	1	1	2020-08-02 20:16:44.376+05:30	2020-08-02 20:16:44.376+05:30
+6	41d06450-7dda-4648-834b-f422d1ded6df	6	add	2020-08-02T14:46:57.970Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 4000	t	f	1	1	2020-08-02 20:16:57.97+05:30	2020-08-02 20:16:57.97+05:30
+7	ec70d777-c0c5-4d79-bbc4-4d53aa0fe8be	7	add	2020-08-02T14:47:24.370Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 1000	t	f	1	1	2020-08-02 20:17:24.37+05:30	2020-08-02 20:17:24.37+05:30
+8	3c8fe855-7eda-4935-9bdc-ded01613acdf	8	add	2020-08-02T14:47:38.960Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 5000	t	f	1	1	2020-08-02 20:17:38.96+05:30	2020-08-02 20:17:38.96+05:30
+9	c99bc603-263c-494f-8c8b-e5cd220d670f	9	add	2020-08-02T14:47:52.731Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 5000	t	f	1	1	2020-08-02 20:17:52.731+05:30	2020-08-02 20:17:52.731+05:30
+10	a1c6b396-f9ff-4d6d-b310-306e70733917	10	add	2020-08-02T14:48:08.206Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 2000	t	f	1	1	2020-08-02 20:18:08.206+05:30	2020-08-02 20:18:08.206+05:30
+11	506a144e-6521-4bb9-9429-dfc6e0f847f4	11	add	2020-08-02T14:48:33.304Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 3000	t	f	1	1	2020-08-02 20:18:33.304+05:30	2020-08-02 20:18:33.304+05:30
+12	4c868b06-e032-4bfb-b36b-9b5d49dc2e0b	12	add	2020-08-02T14:48:55.683Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 5000	t	f	1	1	2020-08-02 20:18:55.683+05:30	2020-08-02 20:18:55.683+05:30
+13	8f06a510-ce98-465c-b982-33be98be657a	13	add	2020-08-02T14:49:11.318Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 5000	t	f	1	1	2020-08-02 20:19:11.318+05:30	2020-08-02 20:19:11.318+05:30
+14	8cf908ef-615e-4c30-a5fd-4f3e08ffc9eb	14	add	2020-08-02T14:49:31.062Z	10	Stock Purchased from undefined on Sun Aug 02 2020 with price 500	t	f	1	1	2020-08-02 20:19:31.062+05:30	2020-08-02 20:19:31.062+05:30
+15	29cecdec-6e69-469e-a0c6-de5db73ec68f	15	add	2020-08-02T14:50:06.264Z	9	Stock Purchased from undefined on Sun Aug 02 2020 with price 1000	t	f	1	1	2020-08-02 20:20:06.264+05:30	2020-08-02 20:20:06.264+05:30
+\.
+
+
+--
+-- Data for Name: stocks; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.stocks (id, uuid, stock_id, buy_price, buy_date, buy_person_id, buy_transaction_id, status, sell_price, sell_date, sell_person_id, sell_transaction_id, note, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+1	e472ccd6-cdd8-441e-86f9-95a5093b8f4c	1	1000	2020-08-01 00:00:00+05:30	9	1	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:15:08.083+05:30	2020-08-02 20:15:08.083+05:30
+2	a02bb99a-e249-4115-8274-cc84144a4593	2	2000	2020-08-01 00:00:00+05:30	10	2	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:15:42.607+05:30	2020-08-02 20:15:42.607+05:30
+3	b7780e52-f61b-4471-89fc-f1540104c620	3	3000	2020-07-31 00:00:00+05:30	10	3	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:16:14.466+05:30	2020-08-02 20:16:14.466+05:30
+4	2e33c3f0-3465-45ab-afc8-9c68a4e7bb27	4	4000	2020-08-01 00:00:00+05:30	9	4	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:16:29.841+05:30	2020-08-02 20:16:29.841+05:30
+5	2862e7c0-f855-408b-929d-ac01bba6a08f	5	3000	2020-08-01 00:00:00+05:30	10	5	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:16:44.365+05:30	2020-08-02 20:16:44.365+05:30
+6	7251abe4-a694-4427-b54e-43bd9518d8e0	6	4000	2020-08-01 00:00:00+05:30	9	6	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:16:57.958+05:30	2020-08-02 20:16:57.958+05:30
+7	61bf5212-f4fc-4058-9255-d97a89bff703	7	1000	2020-08-01 00:00:00+05:30	10	7	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:17:24.36+05:30	2020-08-02 20:17:24.36+05:30
+8	ef597d58-0b38-4916-94a4-b2fc36012d2c	9	5000	2020-07-31 00:00:00+05:30	10	8	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:17:38.949+05:30	2020-08-02 20:17:38.949+05:30
+9	62f7d690-2170-48d8-a11a-c06137beddb4	10	5000	2020-08-02 00:00:00+05:30	10	9	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:17:52.72+05:30	2020-08-02 20:17:52.72+05:30
+10	6b992acd-321b-4eb5-a1b9-8a1d0caec5ad	11	2000	2020-08-02 00:00:00+05:30	9	10	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:18:08.195+05:30	2020-08-02 20:18:08.195+05:30
+11	d15fdb0b-64b5-4977-9b72-082e57c61325	12	3000	2020-08-02 00:00:00+05:30	9	11	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:18:33.293+05:30	2020-08-02 20:18:33.293+05:30
+12	76860d69-abf2-490e-a5bc-630d93de44d0	13	5000	2020-08-02 00:00:00+05:30	10	12	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:18:55.673+05:30	2020-08-02 20:18:55.673+05:30
+13	0ffa2e76-9ad1-46bc-957b-bca1109b5bee	15	5000	2020-07-31 00:00:00+05:30	9	13	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:19:11.307+05:30	2020-08-02 20:19:11.307+05:30
+14	82f73261-1aa8-464f-be3b-91ff8beb2d12	14	500	2020-08-02 00:00:00+05:30	10	14	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:19:31.051+05:30	2020-08-02 20:19:31.051+05:30
+15	b8e87983-30cc-4b2f-9d3f-56485a91bede	8	1000	2020-08-02 00:00:00+05:30	9	15	in-stock	\N	\N	\N	\N	\N	t	f	1	1	2020-08-02 20:20:06.25+05:30	2020-08-02 20:20:06.25+05:30
+\.
+
+
+--
+-- Data for Name: transaction_history; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.transaction_history (id, uuid, action, action_date, person_id, note, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: transactions; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.transactions (id, uuid, person_id, transaction_date, credit, debit, mode, note, is_active, is_deleted, created_by, updated_by, created_at, updated_at) FROM stdin;
+1	6c9ef4c6-7bcb-4372-aa10-75a7e2df29bc	9	2020-08-02 20:15:08.024+05:30	1000	0	stock	\N	t	f	1	1	2020-08-02 20:15:08.024+05:30	2020-08-02 20:15:08.024+05:30
+2	78e04a2f-cd5b-49d9-afd0-da9749e60c0e	10	2020-08-02 20:15:42.571+05:30	2000	0	stock	\N	t	f	1	1	2020-08-02 20:15:42.571+05:30	2020-08-02 20:15:42.571+05:30
+3	c8f0cb19-4473-48a8-82af-241f38145012	10	2020-08-02 20:16:14.422+05:30	3000	0	stock	\N	t	f	1	1	2020-08-02 20:16:14.422+05:30	2020-08-02 20:16:14.422+05:30
+4	7324c5e1-3d44-447d-b9e6-6ea99798fd8f	9	2020-08-02 20:16:29.81+05:30	4000	0	stock	\N	t	f	1	1	2020-08-02 20:16:29.81+05:30	2020-08-02 20:16:29.81+05:30
+5	461124aa-c787-48d9-9b25-1904e2a05f90	10	2020-08-02 20:16:44.318+05:30	3000	0	stock	\N	t	f	1	1	2020-08-02 20:16:44.318+05:30	2020-08-02 20:16:44.318+05:30
+6	a892f727-6abf-4dac-acd2-4ec698c6da04	9	2020-08-02 20:16:57.92+05:30	4000	0	stock	\N	t	f	1	1	2020-08-02 20:16:57.92+05:30	2020-08-02 20:16:57.92+05:30
+7	3b518910-e9fe-4951-bdd8-e815eaca19a1	10	2020-08-02 20:17:24.314+05:30	1000	0	stock	\N	t	f	1	1	2020-08-02 20:17:24.314+05:30	2020-08-02 20:17:24.314+05:30
+8	941f33b0-7c7a-4a8c-974d-49a89c5fdd1c	10	2020-08-02 20:17:38.929+05:30	5000	0	stock	\N	t	f	1	1	2020-08-02 20:17:38.929+05:30	2020-08-02 20:17:38.929+05:30
+9	31337a29-3531-4a54-b8db-21c69ee2666e	10	2020-08-02 20:17:52.683+05:30	5000	0	stock	\N	t	f	1	1	2020-08-02 20:17:52.683+05:30	2020-08-02 20:17:52.683+05:30
+10	ecf6ba36-ba2d-421d-9b05-bc1c67b84194	9	2020-08-02 20:18:08.152+05:30	2000	0	stock	\N	t	f	1	1	2020-08-02 20:18:08.152+05:30	2020-08-02 20:18:08.152+05:30
+11	e80f0828-669f-4357-830e-474a4bf9e347	9	2020-08-02 20:18:33.252+05:30	3000	0	stock	\N	t	f	1	1	2020-08-02 20:18:33.252+05:30	2020-08-02 20:18:33.252+05:30
+12	8bd1b7d4-32a0-48e0-a14f-ec8a4d19708e	10	2020-08-02 20:18:55.625+05:30	5000	0	stock	\N	t	f	1	1	2020-08-02 20:18:55.625+05:30	2020-08-02 20:18:55.625+05:30
+13	ef6517c7-0a49-4482-912b-46d4c1f6eccf	9	2020-08-02 20:19:11.267+05:30	5000	0	stock	\N	t	f	1	1	2020-08-02 20:19:11.267+05:30	2020-08-02 20:19:11.267+05:30
+14	1bae92e5-2fb1-4cee-b242-1acb4f6e9c58	10	2020-08-02 20:19:31.016+05:30	500	0	stock	\N	t	f	1	1	2020-08-02 20:19:31.016+05:30	2020-08-02 20:19:31.016+05:30
+15	aa1b1535-177f-42a8-8e67-582858cb99cf	9	2020-08-02 20:20:06.21+05:30	1000	0	stock	\N	t	f	1	1	2020-08-02 20:20:06.21+05:30	2020-08-02 20:20:06.21+05:30
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: arpan
+--
+
+COPY public.users (id, uuid, first_name, last_name, email, phone, password, user_type, is_active, is_deleted, last_login, created_at, updated_at) FROM stdin;
+1	b33d3e38-1cad-42f4-9114-f155d9606a00	Vijay	Vora	arpan@gmail.com	9033340163	3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79	admin	t	f	\N	2020-08-02 20:10:19.209+05:30	2020-08-02 20:10:19.209+05:30
+\.
+
+
+--
+-- Name: contacts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.contacts_id_seq', 11, true);
+
+
+--
+-- Name: opening_balance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.opening_balance_id_seq', 1, true);
+
+
+--
+-- Name: stock_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.stock_history_id_seq', 15, true);
+
+
+--
+-- Name: stocks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.stocks_id_seq', 15, true);
+
+
+--
+-- Name: transaction_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.transaction_history_id_seq', 1, false);
+
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.transactions_id_seq', 15, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: arpan
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
+
+
+--
+-- Name: SequelizeMeta SequelizeMeta_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public."SequelizeMeta"
+    ADD CONSTRAINT "SequelizeMeta_pkey" PRIMARY KEY (name);
+
+
+--
+-- Name: contacts contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.contacts
+    ADD CONSTRAINT contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: opening_balance opening_balance_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.opening_balance
+    ADD CONSTRAINT opening_balance_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stock_history stock_history_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.stock_history
+    ADD CONSTRAINT stock_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stocks stocks_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.stocks
+    ADD CONSTRAINT stocks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: transaction_history transaction_history_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.transaction_history
+    ADD CONSTRAINT transaction_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: transactions transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: arpan
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
