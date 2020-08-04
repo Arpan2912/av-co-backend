@@ -87,10 +87,10 @@ module.exports = {
     )
   `,
   insertStock: `insert into stocks 
-  (uuid,stock_id,buy_price,buy_date,buy_person_id,buy_transaction_id,status,sell_price,sell_date,sell_person_id,sell_transaction_id,note,
+  (uuid,stock_id,buy_price,buy_date,buy_person_id,buy_transaction_id,weight,status,sell_price,sell_date,sell_person_id,sell_transaction_id,note,
     is_active,is_deleted,created_at,updated_at,created_by,updated_by) 
     values (
-      :uuid,:stock_id,:buy_price,:buy_date,:buy_person_id,:buy_transaction_id,:status,:sell_price,:sell_date,:sell_person_id,:sell_transaction_id,:note,
+      :uuid,:stock_id,:buy_price,:buy_date,:buy_person_id,:buy_transaction_id,:weight,:status,:sell_price,:sell_date,:sell_person_id,:sell_transaction_id,:note,
       :is_active,:is_deleted,:created_at,:updated_at,
       :created_by,:updated_by
     ) returning id`,
@@ -117,6 +117,9 @@ module.exports = {
     if (replacement.status) {
       q += `,status=:status`;
     }
+    if (replacement.weight) {
+      q += `,weight=:weight`;
+    }
     if (replacement.sell_price) {
       q += `,sell_price=:sell_price`;
     }
@@ -139,7 +142,7 @@ module.exports = {
   getStocks: replacement => {
     let q = `select s.uuid as uuid,stock_id,
     buy_price,buy_date,cb.name as buy_person_name,cb.uuid as buy_person_id,
-    buy_transaction_id,status,sell_price,sell_date,cs.name as sell_person_name,cs.uuid as sell_person_id,
+    buy_transaction_id,weight,status,sell_price,sell_date,cs.name as sell_person_name,cs.uuid as sell_person_id,
     sell_transaction_id,note,s.updated_at
     from stocks  as s
     left join contacts as cb on cb.id=s.buy_person_id
@@ -307,7 +310,7 @@ module.exports = {
     `,
     getStockAndAmountWithDalal:`
       select 
-      contacts.uuid,name,sum(buy_price::integer) as amount,
+      contacts.uuid,name,sum(weight) as weight,sum(sell_price::integer * weight) as amount,
       count(*) as "totalStones",
       string_agg(stock_id,',') as stones
       from stocks 

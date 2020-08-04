@@ -15,6 +15,7 @@ module.exports = class StockService {
       buyDate=null,
       buyPersonId=null,
       status=null,
+      weight=null,
       sellPrice=null,
       sellDate=null,
       sellPersonId=null,
@@ -34,7 +35,7 @@ module.exports = class StockService {
       uuid:uuidv4(),
       person_id:buyPersonId,
       debit:0,
-      credit: buyPrice,
+      credit: buyPrice * weight,
       note: `Buy Stock No ${stockId}`,
       mode:'stock',
       transaction_date:new Date().toISOString(),
@@ -55,6 +56,7 @@ module.exports = class StockService {
       buy_date:getValueToStore(buyDate),
       buy_person_id:getValueToStore(buyPersonId),
       buy_transaction_id:getValueToStore(transactionId),
+      weight:getValueToStore(weight),
       status:getValueToStore('current-stock'),
       sell_price:getValueToStore(sellPrice),
       sell_date:getValueToStore(sellDate),
@@ -77,6 +79,7 @@ module.exports = class StockService {
         stock_id:stockId[0][0].id,
         action:'add',
         action_date:new Date().toISOString(),
+        weight:weight,
         status:status,
         person_id:buyPersonId,
         note:historyNote,
@@ -103,6 +106,7 @@ module.exports = class StockService {
         buyDate=null,
         buyPersonId=null,
         buyTransactionId=null,
+        weight=null,
         status=null,
         sellPrice=null,
         sellDate=null,
@@ -172,6 +176,10 @@ module.exports = class StockService {
         }
         updateObj.sell_price = sellPrice;
       }
+      if(weight){
+        updateObj.weight=weight;
+        updateTransactionObj=true;
+      }
       if (sellDate) {
         updateObj.sell_date = sellDate;
       }
@@ -189,68 +197,69 @@ module.exports = class StockService {
         historyNote+= `note updated`
         updateObj.note = note;
       }
-      if(status !== 'jangad'){
-        if(addTransactionObj === true){
-          const transactionObj={
-            uuid:uuidv4(),
-            person_id:sellPersonId,
-            credit:0,
-            debit:sellPrice,
-            note: `Sell Stock No ${stockDetail.stock_id}`,
-            mode: 'stock',
-            transaction_date:new Date().toISOString(),
-            is_active:true,
-            is_deleted:false,
-            created_at:new Date().toISOString(),
-            updated_at:new Date().toISOString(),
-            created_by:id,
-            updated_by:id
-          }
-          transactionId = await TransactionService.addTransaction(transactionObj);
-        } else if(updateTransactionObj === true){
+      if(addTransactionObj === true && status !== 'jangad'){
+        const transactionObj={
+          uuid:uuidv4(),
+          person_id:sellPersonId,
+          credit:0,
+          debit:sellPrice * weight,
+          note: `Sell Stock No ${stockDetail.stock_id}`,
+          mode: 'stock',
+          transaction_date:new Date().toISOString(),
+          is_active:true,
+          is_deleted:false,
+          created_at:new Date().toISOString(),
+          updated_at:new Date().toISOString(),
+          created_by:id,
+          updated_by:id
+        }
+        transactionId = await TransactionService.addTransaction(transactionObj);
+      } 
+      
+      if(updateTransactionObj === true){
 
-          let updateBuyTransactionObj={
-            updated_at:new Date().toISOString(),
-            updated_by:id
-          }
+        let updateBuyTransactionObj={
+          updated_at:new Date().toISOString(),
+          updated_by:id
+        }
 
-          let updateSellTransactionObj={
-            updated_at:new Date().toISOString(),
-            updated_by:id
-          }
-
-          if(buyPrice && stockDetail.buy_price !== buyPrice){
+        let updateSellTransactionObj={
+          updated_at:new Date().toISOString(),
+          updated_by:id
+        }
+        if((buyPrice && stockDetail.buy_price !== buyPrice) || stockDetail.weight != weight){
           updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
-          updateBuyTransactionObj.credit=buyPrice;
+          updateBuyTransactionObj.credit=buyPrice * weight;
           updateBuyTransactionObj.debit=0;
-          }
+        }
 
-          if(buyPersonId && stockDetail.buy_person_id !== buyPersonId){
-            updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
-            updateBuyTransactionObj.person_id=buyPersonId;
-          }
+        if(buyPersonId && stockDetail.buy_person_id !== buyPersonId){
+          updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
+          updateBuyTransactionObj.person_id=buyPersonId;
+        }
 
-          if(sellPrice && stockDetail.sell_price !== sellPrice){
-            updateSellTransactionObj.id=stockDetail.sell_transaction_id;
-            updateSellTransactionObj.debit=sellPrice;
-            updateSellTransactionObj.credit=0;
-          }
+        if((sellPrice && stockDetail.sell_price !== sellPrice)|| stockDetail.weight != weight){
+          updateSellTransactionObj.id=stockDetail.sell_transaction_id;
+          updateSellTransactionObj.debit=sellPrice * weight;
+          updateSellTransactionObj.credit=0;
+        }
 
-          if(sellPersonId && stockDetail.sell_person_id !== sellPersonId){
-            updateSellTransactionObj.id=stockDetail.sell_transaction_id;
-            updateSellTransactionObj.person_id=sellPersonId;
-          }
-          if(updateBuyTransactionObj.id){
-            await TransactionService.updateTransaction(updateBuyTransactionObj)
-          }
-          if(updateSellTransactionObj.id){
-            await TransactionService.updateTransaction(updateSellTransactionObj)
-          }
+        if(sellPersonId && stockDetail.sell_person_id !== sellPersonId){
+          updateSellTransactionObj.id=stockDetail.sell_transaction_id;
+          updateSellTransactionObj.person_id=sellPersonId;
+        }
+        if(updateBuyTransactionObj.id){
+          await TransactionService.updateTransaction(updateBuyTransactionObj)
+        }
+        if(updateSellTransactionObj.id){
+          await TransactionService.updateTransaction(updateSellTransactionObj)
         }
       }
+      
       if(transactionId){
         updateObj.sell_transaction_id=transactionId;
       }
+      
       await DbService.updateStock(updateObj);
       let StockHistoryObj={
         uuid:uuidv4(),
@@ -258,6 +267,7 @@ module.exports = class StockService {
         action:addTransactionObj ? 'sell' :'update',
         action_date:new Date().toISOString(),
         status:status,
+        weight:weight,
         person_id:buyPersonId,
         note:historyNote,
         is_active:true,

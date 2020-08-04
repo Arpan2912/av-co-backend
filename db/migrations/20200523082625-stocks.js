@@ -15,6 +15,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      weight:{
+        type: Sequelize.FLOAT,
+        allowNull: false
+      },
       buy_price: {
         type: Sequelize.STRING,
         allowNull: true
