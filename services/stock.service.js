@@ -287,8 +287,11 @@ module.exports = class StockService {
 
   static async getStocks(req, res) {
     try {
-      let { page = "1", limit = "10", search, from = null,downloadExcel="false" } = req.query;
+      let { page = "1", limit = "10", search, from = null,downloadExcel="false",status ="all" } = req.query;
       let {downloadExcelFields=[]}=req.body;
+      if(status === 'all'){
+        status = null;
+      }
       page = parseInt(page);
       if (page === "NaN") {
         page = 1;
@@ -307,7 +310,8 @@ module.exports = class StockService {
             ? null
             : `%${search}%`,
         is_search: !(search === "" || search === undefined || search === null),
-        download_excel:downloadExcel==='true'?true:false
+        download_excel:downloadExcel==='true'?true:false,
+        status
       };
       const stocks = await DbService.getStocks(replacementObj);
       const stockCountObj = await DbService.getStocksCount(replacementObj);
@@ -327,6 +331,52 @@ module.exports = class StockService {
       }
       return Promise.resolve(responseObj);
     } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  static async deleteStock(req){
+    try {
+      let {
+        u:uuid
+      } = req.query;
+      const { id } = req.userDetail;
+
+      if (!uuid) {
+        throw { code: 409, msg: "please select stock" };
+      }
+
+      const stockObj = { uuid: uuid };
+      let stockDetail = await DbService.getIdFromUuid(stockObj, "stock");
+      stockDetail=stockDetail[0];
+      if(stockDetail.sell_price || stockDetail.sell_person_id || stockDetail.sell_transaction_id){
+        throw { msg: 'Cannot be delete',code:409 };
+      }
+      const stockMainId = stockDetail.id;
+
+      const updateObj = {
+        updated_at: new Date().toISOString(),
+        updated_by: id,
+        is_active: false,
+        is_deleted: true,
+        id: stockMainId
+      };
+      let transactionId = stockDetail.buy_transaction_id;
+
+      let updateBuyTransactionObj={
+        updated_at:new Date().toISOString(),
+        updated_by:id,
+        id: transactionId,
+        is_active: false,
+        is_deleted: true,
+      }
+
+      await TransactionService.updateTransaction(updateBuyTransactionObj)
+      
+      await DbService.updateStock(updateObj);
+      return Promise.resolve();
+    } catch (e) {
+      console.error("e", e);
       return Promise.reject(e);
     }
   }

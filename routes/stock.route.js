@@ -7,5 +7,6 @@ const router = express.Router();
 router.route(stockRoute.addStock).post(StockController.addStock);
 router.route(stockRoute.updateStock).post(StockController.updateStock);
 router.route(stockRoute.getStocks).post(StockController.getStocks);
+router.route(stockRoute.deleteStock).delete(StockController.deleteStock);
 
 module.exports = router;

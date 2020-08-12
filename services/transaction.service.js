@@ -138,8 +138,11 @@ module.exports = class TransactionService {
 
   static async getTransactions(req, res) {
     try {
-      let { page = "1", limit = "10", search, from = null,downloadExcel="false", u:contactUuid = null } = req.query;
+      let { page = "1", limit = "10", search, from = null,downloadExcel="false", u:contactUuid = null,mode='all' } = req.query;
       let {downloadExcelFields=[]}=req.body;
+      if(mode === 'all'){
+        mode = null;
+      }
       page = parseInt(page);
       if (page === "NaN") {
         page = 1;
@@ -167,7 +170,8 @@ module.exports = class TransactionService {
             : `%${search}%`,
         is_search: !(search === "" || search === undefined || search === null),
         download_excel:downloadExcel==='true'?true:false,
-        person_id:contactId
+        person_id:contactId,
+        mode
       };
       const transaction = await DbService.getTransactions(replacementObj);
       const transactionCount = await DbService.getTransactionsCount(replacementObj);

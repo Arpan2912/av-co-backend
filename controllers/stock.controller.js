@@ -42,4 +42,17 @@ module.exports = class StockController {
       CommonService.logErrorAndSendResponse(e, res, null);
     }
   }
+
+  static async deleteStock(req, res) {
+    try {
+      await StockService.deleteStock(req, res);
+      const responseObj = CommonService.prepareSuccessResponse(
+        "Stock deleted successfully",
+        null
+      );
+      return res.status(200).send(responseObj);
+    } catch (e) {
+      CommonService.logErrorAndSendResponse(e, res, null);
+    }
+  }
 }

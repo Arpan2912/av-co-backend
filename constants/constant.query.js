@@ -20,7 +20,7 @@ module.exports = {
       :is_active,:is_deleted,:created_at,:updated_at,
       :created_by,:updated_by
     )`,
-  getContactIdFromUuid: `select * from contacts where uuid=:uuid`,
+  getContactIdFromUuid: `select * from contacts where uuid=:uuid and is_active=true and is_deleted=false`,
 
   updateCotact: replacement => {
     let q = `update contacts set updated_at=:updated_at,updated_by=:updated_by`;
@@ -66,6 +66,8 @@ module.exports = {
            upper(mobile2) like upper(:search) 
        else true end
     )
+    and is_active=true
+    and is_deleted=false
      order by name asc
     `;
     if (replacement.download_excel === false) {
@@ -85,6 +87,8 @@ module.exports = {
         upper(mobile2) like upper(:search) 
     else true end
     )
+    and is_active=true
+    and is_deleted=false
   `,
   insertStock: `insert into stocks 
   (uuid,stock_id,buy_price,buy_date,buy_person_id,buy_transaction_id,weight,status,sell_price,sell_date,sell_person_id,sell_transaction_id,note,
@@ -94,8 +98,8 @@ module.exports = {
       :is_active,:is_deleted,:created_at,:updated_at,
       :created_by,:updated_by
     ) returning id`,
-  getStockIdFromUuid: `select * from stocks where uuid=:uuid`,
-  getStockDetailFromId:`select * from stocks where id=:id`,
+  getStockIdFromUuid: `select * from stocks where uuid=:uuid and is_active=true and is_deleted=false`,
+  getStockDetailFromId:`select * from stocks where id=:id and is_active=true and is_deleted=false`,
   updateStock: replacement => {
     let q = `update stocks set updated_at=:updated_at,updated_by=:updated_by`;
     if (replacement.stock_id) {
@@ -132,6 +136,12 @@ module.exports = {
     if (replacement.sell_transaction_id) {
       q += `,sell_transaction_id=:sell_transaction_id`;
     }
+    if (replacement.hasOwnProperty('is_active')) {
+      q += `,is_active=:is_active`;
+    }
+    if (replacement.hasOwnProperty('is_deleted')) {
+      q += `,is_deleted=:is_deleted`;
+    }
     if (replacement.note) {
       q += `,note=:note`;
     }
@@ -157,6 +167,14 @@ module.exports = {
          upper(cs.name) like upper(:search)
        else true end
     )
+    and 
+      case 
+        when :status is not null 
+        then status=:status 
+        else true   
+      end
+    and s.is_active=true
+    and s.is_Deleted=false
     order by s.updated_at desc`;
     if (replacement.download_excel === false) {
       q += ` offset :offset limit :limit `;
@@ -176,7 +194,17 @@ module.exports = {
        upper(cb.name) like upper(:search) or
        upper(cs.name) like upper(:search)
      else true end
-  )`,
+  )
+  and 
+    case 
+      when :status is not null 
+      then status=:status 
+      else true   
+    end
+  and s.is_active=true
+  and s.is_Deleted=false
+  `,
+
   insertStockHistory:`insert into stock_history
   (uuid,stock_id,action,action_date,person_id,note,
     is_active,is_deleted,created_at,updated_at,created_by,updated_by) 
@@ -220,6 +248,12 @@ module.exports = {
       if (replacement.note) {
         q += `,note=:note`;
       }
+      if (replacement.hasOwnProperty('is_active')) {
+        q += `,is_active=:is_active`;
+      }
+      if (replacement.hasOwnProperty('is_deleted')) {
+        q += `,is_deleted=:is_deleted`;
+      }
       q += ` where id=:id`;
       return q;
     }, 
@@ -237,8 +271,21 @@ module.exports = {
            upper(c.name) like upper(:search) or 
            upper(mode) like upper(:search) 
          else true end
-      ) and 
-      case when :person_id is not null then person_id=:person_id else true end
+      ) 
+      and 
+        case 
+          when :person_id is not null 
+          then person_id=:person_id 
+          else true 
+        end
+      and 
+        case 
+          when :mode is not null 
+          then mode=:mode 
+          else true 
+        end
+      and t.is_active=true
+      and t.is_Deleted=false
       order by t.updated_at desc
       `;
       if (replacement.download_excel === false) {
@@ -259,6 +306,14 @@ module.exports = {
        else true end
     ) and
     case when :person_id is not null then person_id=:person_id else true end
+    and 
+      case 
+        when :mode is not null 
+        then mode=:mode 
+        else true 
+      end
+    and t.is_active=true
+    and t.is_Deleted=false
     `,
 
     insertTransactionHistory:`insert into transaction_history
@@ -292,19 +347,24 @@ module.exports = {
     },
 
     getOpeningBalance: replacement =>{
-      let q = `select amount,uuid from opening_balance where date=:date`;
+      let q = `select amount,uuid from opening_balance where date=:date and is_active=true and is_deleted=false`;
       return q;
     },
-    getOpeningBalanceIdFromUuid: `select * from opening_balance where uuid=:uuid`,
+    getOpeningBalanceIdFromUuid: `select * from opening_balance where uuid=:uuid and is_active=true and is_deleted=false`,
 
     getFinalAmountForDate: `
       with transaction_data as (
         select sum(coalesce(credit,0)-coalesce(debit,0)) as transaction  
         from transactions where date(transaction_date)=:date
-        and mode='cash'
+        and mode='cash' 
+        and is_active=true
+        and is_deleted=false
       ),
       opening_balance_data as (
-        select amount as opening_balance from opening_balance where date(date) =:date
+        select amount as opening_balance from opening_balance 
+        where date(date) =:date
+        and is_active=true
+        and is_deleted=false
       )
       select opening_balance as "openingBalance", coalesce(opening_balance::integer,0)+coalesce(transaction::integer,0) as "total" from transaction_data inner join opening_balance_data on true
     `,
@@ -322,6 +382,8 @@ module.exports = {
           then upper(name) like upper(:search) 
          else true end
       )
+      and stocks.is_active=true
+      and stocks.is_deleted=false
       group by sell_person_id,contacts.uuid,name
       order by name
       offset :offset limit :limit 
@@ -337,6 +399,8 @@ module.exports = {
           then upper(name) like upper(:search) 
          else true end
       )
+      and stocks.is_active=true
+      and stocks.is_deleted=false
     `
     ,
     getAccountSummary:`
@@ -347,7 +411,8 @@ module.exports = {
           when :is_search 
           then upper(name) like upper(:search) 
          else true end
-      
+      and t.is_active=true
+      and t.is_deleted=false
       group by c.uuid,c.name
       order by name
       offset :offset limit :limit 
@@ -361,6 +426,7 @@ module.exports = {
           when :is_search 
           then upper(name) like upper(:search) 
          else true end
-      
+        and transactions.is_active=true
+        and transactions.is_deleted=false
     `
 };
