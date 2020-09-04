@@ -7,6 +7,7 @@ const  { getValueToStore } = require("../services/common.service");
 const  CommonService = require("../services/common.service");
 const TransactionService= require("./transaction.service");
 
+
 module.exports = class StockService {
   static async addStock(req, res) {
     let {
@@ -23,60 +24,60 @@ module.exports = class StockService {
       mode= null,
     } = req.body;
     const { id } = req.userDetail;
-    
-    let contactDetail = null;
-    if(buyPersonId){
-      const contactObj = { uuid: buyPersonId };
-      contactDetail = await DbService.getIdFromUuid(contactObj, "contact");
-      buyPersonId = contactDetail[0].id;
-    }
-    let transactionId = null;
-    const transactionObj={
-      uuid:uuidv4(),
-      person_id:buyPersonId,
-      debit:0,
-      credit: buyPrice * weight,
-      note: `Buy Stock No ${stockId}`,
-      mode:'stock',
-      transaction_date:new Date().toISOString(),
-      created_at:new Date().toISOString(),
-      updated_at:new Date().toISOString(),
-      is_active:true,
-      is_deleted:false,
-      created_by:id,
-      updated_by:id
-    }
-
-    transactionId = await TransactionService.addTransaction(transactionObj);
-
-    const obj = {
-      uuid: uuidv4(),
-      stock_id: stockId,
-      buy_price:getValueToStore(buyPrice),
-      buy_date:getValueToStore(buyDate),
-      buy_person_id:getValueToStore(buyPersonId),
-      buy_transaction_id:getValueToStore(transactionId),
-      weight:getValueToStore(weight),
-      status:getValueToStore('current-stock'),
-      sell_price:getValueToStore(sellPrice),
-      sell_date:getValueToStore(sellDate),
-      sell_person_id:null,
-      sell_transaction_id:null,
-      note:getValueToStore(note),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: id,
-      updated_by: id,
-      is_active: true,
-      is_deleted: false
-    };
-
+    const t = await DbService.excuteDbTransaction();
     try {
-      let stockId = await DbService.insertRecordToDb(obj, "stock");
+      let contactDetail = null;
+      if(buyPersonId){
+        const contactObj = { uuid: buyPersonId };
+        contactDetail = await DbService.getIdFromUuid(contactObj, "contact");
+        buyPersonId = contactDetail[0].id;
+      }
+      let transactionId = null;
+      const transactionObj={
+        uuid:uuidv4(),
+        person_id:buyPersonId,
+        debit:0,
+        credit: buyPrice * weight,
+        note: `Buy Stock No ${stockId}`,
+        mode:'stock',
+        transaction_date:new Date().toISOString(),
+        created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString(),
+        is_active:true,
+        is_deleted:false,
+        created_by:id,
+        updated_by:id
+      }
+      transactionId = await TransactionService.addTransaction(transactionObj,t);
+
+      const obj = {
+        uuid: uuidv4(),
+        stock_id: stockId,
+        buy_price:getValueToStore(buyPrice),
+        buy_date:getValueToStore(buyDate),
+        buy_person_id:getValueToStore(buyPersonId),
+        buy_transaction_id:getValueToStore(transactionId),
+        weight:getValueToStore(weight),
+        status:getValueToStore('current-stock'),
+        sell_price:getValueToStore(sellPrice),
+        sell_date:getValueToStore(sellDate),
+        sell_person_id:null,
+        sell_transaction_id:null,
+        note:getValueToStore(note),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: id,
+        updated_by: id,
+        is_active: true,
+        is_deleted: false
+      };
+
+   
+      let stockDetail = await DbService.insertRecordToDb(obj, "stock",t);
       let historyNote=`Stock Purchased from ${contactDetail.name} on ${new Date().toDateString()} with price ${buyPrice}`
       let StockHistoryObj={
         uuid:uuidv4(),
-        stock_id:stockId[0][0].id,
+        stock_id:stockDetail[0][0].id,
         action:'add',
         action_date:new Date().toISOString(),
         weight:weight,
@@ -91,9 +92,11 @@ module.exports = class StockService {
         updated_by:id
       }
       await DbService.insertRecordToDb(StockHistoryObj, "stock_history");
+      await t.commit();
       return Promise.resolve();
     } catch (e) {
       console.log("e",e);
+      await t.rollback();
       return Promise.reject(e);
     }
   }

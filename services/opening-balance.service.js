@@ -11,12 +11,11 @@ module.exports = class OpeningBalanceService {
       note = null
     } = req.body;
     const { id } = req.userDetail;
-    const date = moment().format('YYYY-MM-DD');
+    // const date = moment().format('YYYY-MM-DD');
     const obj = {
       uuid: uuidv4(),
-      amount:getValueToStore(amount),
-      date,
-      note:getValueToStore(note),
+      value:getValueToStore(amount),
+      key:'base_amount',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: id,
@@ -24,7 +23,7 @@ module.exports = class OpeningBalanceService {
       is_active: true,
       is_deleted: false
     };
-    await DbService.insertRecordToDb(obj, "opening_balance");
+    await DbService.insertRecordToDb(obj, "user_settings");
     return Promise.resolve();
   }
 
@@ -49,10 +48,10 @@ module.exports = class OpeningBalanceService {
       const updateObj = {
         updated_at: new Date().toISOString(),
         updated_by: id,
-        amount,
+        value:amount,
         uuid: openingBalanceUuid
       }; 
-      await DbService.updateOpeningBalance(updateObj);
+      await DbService.updateUserSetting(updateObj);
       return Promise.resolve();
     } catch (e) {
       console.error("e", e);
@@ -61,11 +60,11 @@ module.exports = class OpeningBalanceService {
   }
 
   static async getTodayOpeningBalance(req){
-    const date = moment().format('YYYY-MM-DD');
+    // const date = moment().format('YYYY-MM-DD');
     const replacementObj = {
-      date
+      key:'base_amount'
     }
-    const todayOpeningBalanceResponse = await DbService.getOpeningBalance(replacementObj);
+    const todayOpeningBalanceResponse = await DbService.getUserSettings(replacementObj);
     console.log(todayOpeningBalanceResponse);
     if(todayOpeningBalanceResponse && todayOpeningBalanceResponse[0]){
       return todayOpeningBalanceResponse[0];

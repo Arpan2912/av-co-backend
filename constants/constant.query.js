@@ -352,17 +352,45 @@ module.exports = {
     },
     getOpeningBalanceIdFromUuid: `select * from opening_balance where uuid=:uuid and is_active=true and is_deleted=false`,
 
+    insertUserSettings:`insert into user_settings
+      (uuid,key,value,
+      is_active,is_deleted,created_at,updated_at,created_by,updated_by) 
+      values (
+        :uuid,:key,:value,
+        :is_active,:is_deleted,:created_at,:updated_at,
+        :created_by,:updated_by
+      )`,
+
+    updateUserSetting: replacement => {
+      let q = `update user_settings set updated_at=:updated_at,updated_by=:updated_by`;
+      // if (replacement.key) {
+      //   q += `,key=:key`;
+      // }
+      if (replacement.value) {
+        q += `,value=:value`;
+      }
+      q += ` where uuid=:uuid`;
+      return q;
+    },
+
+    getUserSettings: replacement =>{
+      let q = `select value,uuid from user_settings where key=:key and is_active=true and is_deleted=false`;
+      return q;
+    },
+
+    getUserSettingsIdFromUuid: `select * from user_settings where uuid=:uuid and is_active=true and is_deleted=false`,
+
     getFinalAmountForDate: `
       with transaction_data as (
         select sum(coalesce(credit,0)-coalesce(debit,0)) as transaction  
-        from transactions where date(transaction_date)=:date
-        and mode='cash' 
+        from transactions 
+        where mode='cash' 
         and is_active=true
         and is_deleted=false
       ),
       opening_balance_data as (
-        select amount as opening_balance from opening_balance 
-        where date(date) =:date
+        select value as opening_balance from user_settings 
+        where key='base_amount'
         and is_active=true
         and is_deleted=false
       )

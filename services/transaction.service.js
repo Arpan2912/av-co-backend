@@ -51,9 +51,9 @@ module.exports = class TransactionService {
     return TransactionService.addTransaction(obj);
   }
 
-  static async addTransaction(obj,contactDetail){
+  static async addTransaction(obj,t){
     try {
-      let transactionObj = await DbService.insertRecordToDb(obj, "transaction");
+      let transactionObj = await DbService.insertRecordToDb(obj, "transaction",t);
       return transactionObj[0][0].id;
       // return Promise.resolve();
     } catch (e) {
