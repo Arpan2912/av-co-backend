@@ -130,7 +130,7 @@ module.exports = {
     if (replacement.sell_date) {
       q += `,sell_date=:sell_date`;
     }
-    if (replacement.sell_person_id) {
+    if (replacement.hasOwnProperty('sell_person_id')) {
       q += `,sell_person_id=:sell_person_id`;
     }
     if (replacement.sell_transaction_id) {
@@ -230,16 +230,16 @@ module.exports = {
         q += `,stock_id=:stock_id`;
       }
       // if (replacement.last_name) {
-      if (replacement.person_id) {
+      if (replacement.hasOwnProperty('person_id')) {
         q += `,person_id=:person_id`;
       }
       if (replacement.transaction_date) {
         q += `,transaction_date=:transaction_date`;
       }
-      if (replacement.credit) {
+      if (replacement.hasOwnProperty('credit')) {
         q += `,credit=:credit`;
       }
-      if (replacement.debit) {
+      if (replacement.hasOwnProperty('debit')) {
         q += `,debit=:debit`;
       }
       if (replacement.mode) {

@@ -169,16 +169,24 @@ module.exports = class StockService {
       if (buyTransactionId) {
         updateObj.buy_transaction_id = buyTransactionId;
       }
-      if (sellPrice && stockDetail.sell_price !== sellPrice) {
-        if(stockDetail.sell_price){
-          historyNote+= `sell price changed to ${sellPrice}`
+      if(sellPrice){
+        updateObj.sell_price = sellPrice;
+        if(stockDetail.sell_transaction_id && stockDetail.sell_price !== sellPrice){
           updateTransactionObj=true;
-        } else {
-          historyNote+= `stone sold to ${sellContactDetail.name} on ${new Date().toDateString()}`
+        } else if (!stockDetail.sell_transaction_id){
           addTransactionObj=true;
         }
-        updateObj.sell_price = sellPrice;
       }
+      // if (sellPrice && stockDetail.sell_price !== sellPrice) {
+      //   if(stockDetail.sell_price){
+      //     historyNote+= `sell price changed to ${sellPrice}`
+      //     updateTransactionObj=true;
+      //   } else {
+      //     // historyNote+= `stone sold to ${sellContactDetail.name} on ${new Date().toDateString()}`
+      //     addTransactionObj=true;
+      //   }
+      //   updateObj.sell_price = sellPrice;
+      // }
       if(weight){
         updateObj.weight=weight;
         updateTransactionObj=true;
@@ -186,12 +194,22 @@ module.exports = class StockService {
       if (sellDate) {
         updateObj.sell_date = sellDate;
       }
-      if (sellPersonId && stockDetail.sell_person_id !== sellPersonId) {
+      if(sellPersonId){
         if(stockDetail.sell_person_id){
           historyNote+= `sell person changed to ${sellContactDetail.name}`
         }
-        updateObj.sell_person_id = sellPersonId;
+        if(stockDetail.sell_person_id !== sellPersonId){
+          updateObj.sell_person_id = sellPersonId;
+        }
+      } else {
+        updateObj.sell_person_id = null;
       }
+      // if (sellPersonId && stockDetail.sell_person_id !== sellPersonId) {
+      //   if(stockDetail.sell_person_id){
+      //     historyNote+= `sell person changed to ${sellContactDetail.name}`
+      //   }
+      //   updateObj.sell_person_id = sellPersonId;
+      // }
       if (status && stockDetail.status !== status) {
         historyNote+= `status changed to ${status}`
         updateObj.status = status;
@@ -201,13 +219,21 @@ module.exports = class StockService {
         updateObj.note = note;
       }
       if(addTransactionObj === true && status !== 'jangad'){
+        let mode = 'stock';
+        let credit = 0;
+        let debit = sellPrice * weight;
+        if(!sellPersonId){
+          mode = 'cash';
+          credit = debit;
+          debit = 0;
+        }
         const transactionObj={
           uuid:uuidv4(),
           person_id:sellPersonId,
-          credit:0,
-          debit:sellPrice * weight,
+          credit,
+          debit,
           note: `Sell Stock No ${stockDetail.stock_id}`,
-          mode: 'stock',
+          mode,
           transaction_date:new Date().toISOString(),
           is_active:true,
           is_deleted:false,
@@ -245,9 +271,13 @@ module.exports = class StockService {
           updateSellTransactionObj.id=stockDetail.sell_transaction_id;
           updateSellTransactionObj.debit=sellPrice * weight;
           updateSellTransactionObj.credit=0;
+          if(!sellPersonId){
+            updateSellTransactionObj.credit=sellPrice * weight;
+            updateSellTransactionObj.debit=0;
+          } 
         }
 
-        if(sellPersonId && stockDetail.sell_person_id !== sellPersonId){
+        if(stockDetail.sell_person_id !== sellPersonId){
           updateSellTransactionObj.id=stockDetail.sell_transaction_id;
           updateSellTransactionObj.person_id=sellPersonId;
         }
@@ -255,6 +285,10 @@ module.exports = class StockService {
           await TransactionService.updateTransaction(updateBuyTransactionObj)
         }
         if(updateSellTransactionObj.id){
+          updateSellTransactionObj.mode = 'stock';
+          if(!sellPersonId){
+            updateSellTransactionObj.mode = 'cash';
+          }
           await TransactionService.updateTransaction(updateSellTransactionObj)
         }
       }
