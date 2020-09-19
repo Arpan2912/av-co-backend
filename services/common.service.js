@@ -63,7 +63,7 @@ module.exports = class CommonService {
     const code = e.code ? e.code : 500;
     // eslint-disable-next-line no-console
     console.error(e);
-    if (e instanceof Error) {
+    if(e instanceof Error) {
       AppLogger.error(e);
     }
     const errorObj = CommonService.prepareErrorResponse(msg, data);

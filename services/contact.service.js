@@ -62,7 +62,7 @@ module.exports = class ContactService {
       } = req.body;
       const { id } = req.userDetail;
 
-      if (!contactUuid) {
+      if(!contactUuid) {
         throw { code: 409, msg: "please select contact" };
       }
 
@@ -76,29 +76,29 @@ module.exports = class ContactService {
         contact_id: contactId
       };
 
-      if (name) {
+      if(name) {
         updateObj.name = name;
       }
-      if (email) {
+      if(email) {
         updateObj.email = email;
       }
-      if (address) {
+      if(address) {
         updateObj.address = address;
       }
-      if (mobile1) {
+      if(mobile1) {
         updateObj.mobile1 = mobile1;
       }
-      if (mobile2) {
+      if(mobile2) {
         updateObj.mobile2 = mobile2;
       }
-      if (city) {
+      if(city) {
         updateObj.city = city;
       }
-      if (company) {
+      if(company) {
         updateObj.company = company;
       }
       
-      if (type) {
+      if(type) {
         updateObj.type = type;
       }
       
@@ -115,11 +115,11 @@ module.exports = class ContactService {
       let { page = "1", limit = "10", search, from = null,downloadExcel="false" } = req.query;
       let {downloadExcelFields=[]}=req.body;
       page = parseInt(page);
-      if (page === "NaN") {
+      if(page === "NaN") {
         page = 1;
       }
       limit = parseInt(limit);
-      if (limit === "NaN") {
+      if(limit === "NaN") {
         limit = 1;
       }
       const offset = (page - 1) * limit;

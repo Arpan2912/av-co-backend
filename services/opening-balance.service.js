@@ -37,7 +37,7 @@ module.exports = class OpeningBalanceService {
       } = req.body;
       const { id } = req.userDetail;
 
-      if (!openingBalanceUuid) {
+      if(!openingBalanceUuid) {
         throw { code: 409, msg: "please select opening balance" };
       }
 
@@ -78,11 +78,11 @@ module.exports = class OpeningBalanceService {
   //     let { page = "1", limit = "10", search, from = null,downloadExcel="false" } = req.query;
   //     let {downloadExcelFields=[]}=req.body;
   //     page = parseInt(page);
-  //     if (page === "NaN") {
+  //     if(page === "NaN") {
   //       page = 1;
   //     }
   //     limit = parseInt(limit);
-  //     if (limit === "NaN") {
+  //     if(limit === "NaN") {
   //       limit = 1;
   //     }
   //     const offset = (page - 1) * limit;

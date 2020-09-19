@@ -30,19 +30,19 @@ module.exports = class AppRoutes {
     app.all(["/*"], allowAccess);
 
     app.use(async (req, res, next) => {
-      if (req.user) {
+      if(req.user) {
         const { phone } = req.user;
         try {
           const rp = {
             phone
           };
           let userDetail = await DbService.getUserDetail(rp);
-          if (userDetail.length === 0) {
+          if(userDetail.length === 0) {
             throw { code: 401, msg: "User is exist" };
           }
           const user = userDetail[0];
           userDetail = user;
-          if (
+          if(
             userDetail.is_deleted === true ||
             userDetail.is_active === false
           ) {
@@ -73,7 +73,7 @@ module.exports = class AppRoutes {
     app.use("/dashboard", dashboardRoutes);
 
     app.use(function(err, req, res) {
-      if (err.name === "UnauthorizedError") {
+      if(err.name === "UnauthorizedError") {
         res.status(401).send("invalid token...");
       }
     });

@@ -51,6 +51,70 @@ module.exports = class TransactionService {
     return TransactionService.addTransaction(obj);
   }
 
+  static async addOtherTransaction(req,res){
+    const {
+      debitPersonId,
+      creditPersonId,
+      transactionDate=null,
+      amount=null,
+      note=null,
+      mode=null
+    } = req.body;
+    const { id } = req.userDetail;
+    let debitContactId = 0;
+    let creditContactId = 0;
+    if(debitPersonId !== null){
+      const contactObj = { uuid: debitPersonId };
+      const contactDetail = await DbService.getIdFromUuid(contactObj, "contact");
+      debitContactId = contactDetail[0].id;
+    }
+
+    if(creditPersonId !== null){
+      const contactObj = { uuid: creditPersonId };
+      const contactDetail = await DbService.getIdFromUuid(contactObj, "contact");
+      creditContactId = contactDetail[0].id;
+    }
+    const transactionArr = [];
+    let debitObj = {
+      contactId : debitContactId,
+      type: 'debit'
+    }
+    let creditObj = {
+      contactId : creditContactId,
+      type: 'credit'
+    }
+    transactionArr.push(debitObj);
+    transactionArr.push(creditObj);
+    for(let i=0;i<transactionArr.length;i++){
+      let currentData = transactionArr[i];
+      const { contactId, type } = currentData;
+      let credit = null;
+      let debit = null;
+      if(type === 'credit'){
+        credit = amount
+      } 
+      if(type === 'debit'){
+        debit = amount;
+      }
+      const obj = {
+        uuid: uuidv4(),
+        person_id: contactId,
+        transaction_date:getValueToStore(transactionDate),
+        credit:getValueToStore(credit),
+        debit:getValueToStore(debit),
+        note:getValueToStore(note),
+        mode:getValueToStore(mode),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: id,
+        updated_by: id,
+        is_active: true,
+        is_deleted: false
+      };
+      await TransactionService.addTransaction(obj);
+    }
+  }
+
   static async addTransaction(obj,t){
     try {
       let transactionObj = await DbService.insertRecordToDb(obj, "transaction",t);
@@ -74,7 +138,7 @@ module.exports = class TransactionService {
       } = req.body;
       const { id } = req.userDetail;
 
-      if (!uuid) {
+      if(!uuid) {
         throw { code: 409, msg: "please select transaction" };
       }
 
@@ -104,22 +168,27 @@ module.exports = class TransactionService {
         id: transactionId
       };
 
-      if (contactId) {
+      if(contactId) {
         updateObj.person_id = contactId;
       }
-      if (transactionDate) {
+      if(transactionDate) {
         updateObj.transaction_date = transactionDate;
       }
-      if (credit) {
-        updateObj.credit = credit;
+      if(credit || debit){
+        if(credit) {
+          updateObj.credit = credit;
+          updateObj.debit = null;
+        }
+        if(debit) {
+          updateObj.credit = null;
+          updateObj.debit = debit;
+        }
       }
-      if (debit) {
-        updateObj.debit = debit;
-      }
-      if (note) {
+      
+      if(note) {
         updateObj.note = note;
       }
-       if (mode) {
+       if(mode) {
         updateObj.mode = mode;
       }
 
@@ -144,11 +213,11 @@ module.exports = class TransactionService {
         mode = null;
       }
       page = parseInt(page);
-      if (page === "NaN") {
+      if(page === "NaN") {
         page = 1;
       }
       limit = parseInt(limit);
-      if (limit === "NaN") {
+      if(limit === "NaN") {
         limit = 1;
       }
       const offset = (page - 1) * limit;

@@ -24,29 +24,29 @@ module.exports = {
 
   updateCotact: replacement => {
     let q = `update contacts set updated_at=:updated_at,updated_by=:updated_by`;
-    if (replacement.name) {
+    if(replacement.name) {
       q += `,name=:name`;
     }
-    // if (replacement.last_name) {
-    if (replacement.email) {
+    // if(replacement.last_name) {
+    if(replacement.email) {
       q += `,email=:email`;
     }
-    if (replacement.mobile1) {
+    if(replacement.mobile1) {
       q += `,mobile1=:mobile1`;
     }
-    if (replacement.mobile2) {
+    if(replacement.mobile2) {
       q += `,mobile2=:mobile2`;
     }
-    if (replacement.address) {
+    if(replacement.address) {
       q += `,address=:address`;
     }
-    if (replacement.city) {
+    if(replacement.city) {
       q += `,city=:city`;
     }
-    if (replacement.company) {
+    if(replacement.company) {
       q += `,company=:company`;
     }
-    if (replacement.type) {
+    if(replacement.type) {
       q += `,type=:type`;
     }
     q += ` where id=:contact_id`;
@@ -70,7 +70,7 @@ module.exports = {
     and is_deleted=false
      order by name asc
     `;
-    if (replacement.download_excel === false) {
+    if(replacement.download_excel === false) {
       q += `offset :offset limit :limit `;
     }
     return q;
@@ -102,47 +102,47 @@ module.exports = {
   getStockDetailFromId:`select * from stocks where id=:id and is_active=true and is_deleted=false`,
   updateStock: replacement => {
     let q = `update stocks set updated_at=:updated_at,updated_by=:updated_by`;
-    if (replacement.stock_id) {
+    if(replacement.stock_id) {
       q += `,stock_id=:stock_id`;
     }
-    // if (replacement.last_name) {
-    if (replacement.buy_price) {
+    // if(replacement.last_name) {
+    if(replacement.buy_price) {
       q += `,buy_price=:buy_price`;
     }
-    if (replacement.buy_date) {
+    if(replacement.buy_date) {
       q += `,buy_date=:buy_date`;
     }
-    if (replacement.buy_person_id) {
+    if(replacement.buy_person_id) {
       q += `,buy_person_id=:buy_person_id`;
     }
-    if (replacement.buy_transaction_id) {
+    if(replacement.buy_transaction_id) {
       q += `,buy_transaction_id=:buy_transaction_id`;
     }
-    if (replacement.status) {
+    if(replacement.status) {
       q += `,status=:status`;
     }
-    if (replacement.weight) {
+    if(replacement.weight) {
       q += `,weight=:weight`;
     }
-    if (replacement.sell_price) {
+    if(replacement.sell_price) {
       q += `,sell_price=:sell_price`;
     }
-    if (replacement.sell_date) {
+    if(replacement.sell_date) {
       q += `,sell_date=:sell_date`;
     }
-    if (replacement.hasOwnProperty('sell_person_id')) {
+    if(replacement.hasOwnProperty('sell_person_id')) {
       q += `,sell_person_id=:sell_person_id`;
     }
-    if (replacement.sell_transaction_id) {
+    if(replacement.sell_transaction_id) {
       q += `,sell_transaction_id=:sell_transaction_id`;
     }
-    if (replacement.hasOwnProperty('is_active')) {
+    if(replacement.hasOwnProperty('is_active')) {
       q += `,is_active=:is_active`;
     }
-    if (replacement.hasOwnProperty('is_deleted')) {
+    if(replacement.hasOwnProperty('is_deleted')) {
       q += `,is_deleted=:is_deleted`;
     }
-    if (replacement.note) {
+    if(replacement.note) {
       q += `,note=:note`;
     }
     q += ` where id=:id`;
@@ -176,7 +176,7 @@ module.exports = {
     and s.is_active=true
     and s.is_Deleted=false
     order by s.updated_at desc`;
-    if (replacement.download_excel === false) {
+    if(replacement.download_excel === false) {
       q += ` offset :offset limit :limit `;
     }
     return q;
@@ -226,32 +226,32 @@ module.exports = {
     
     updateTransaction: replacement => {
       let q = `update transactions set updated_at=:updated_at,updated_by=:updated_by`;
-      if (replacement.stock_id) {
+      if(replacement.stock_id) {
         q += `,stock_id=:stock_id`;
       }
-      // if (replacement.last_name) {
-      if (replacement.hasOwnProperty('person_id')) {
+      // if(replacement.last_name) {
+      if(replacement.hasOwnProperty('person_id')) {
         q += `,person_id=:person_id`;
       }
-      if (replacement.transaction_date) {
+      if(replacement.transaction_date) {
         q += `,transaction_date=:transaction_date`;
       }
-      if (replacement.hasOwnProperty('credit')) {
+      if(replacement.hasOwnProperty('credit')) {
         q += `,credit=:credit`;
       }
-      if (replacement.hasOwnProperty('debit')) {
+      if(replacement.hasOwnProperty('debit')) {
         q += `,debit=:debit`;
       }
-      if (replacement.mode) {
+      if(replacement.mode) {
         q += `,mode=:mode`;
       }
-      if (replacement.note) {
+      if(replacement.note) {
         q += `,note=:note`;
       }
-      if (replacement.hasOwnProperty('is_active')) {
+      if(replacement.hasOwnProperty('is_active')) {
         q += `,is_active=:is_active`;
       }
-      if (replacement.hasOwnProperty('is_deleted')) {
+      if(replacement.hasOwnProperty('is_deleted')) {
         q += `,is_deleted=:is_deleted`;
       }
       q += ` where id=:id`;
@@ -288,7 +288,7 @@ module.exports = {
       and t.is_Deleted=false
       order by t.updated_at desc
       `;
-      if (replacement.download_excel === false) {
+      if(replacement.download_excel === false) {
         q += ` offset :offset limit :limit `;
       }
       return q;
@@ -336,10 +336,10 @@ module.exports = {
 
     updateOpeningBalance: replacement => {
       let q = `update opening_balance set updated_at=:updated_at,updated_by=:updated_by`;
-      if (replacement.amount) {
+      if(replacement.amount) {
         q += `,amount=:amount`;
       }
-      if (replacement.note) {
+      if(replacement.note) {
         q += `,note=:note`;
       }
       q += ` where uuid=:uuid`;
@@ -363,10 +363,10 @@ module.exports = {
 
     updateUserSetting: replacement => {
       let q = `update user_settings set updated_at=:updated_at,updated_by=:updated_by`;
-      // if (replacement.key) {
+      // if(replacement.key) {
       //   q += `,key=:key`;
       // }
-      if (replacement.value) {
+      if(replacement.value) {
         q += `,value=:value`;
       }
       q += ` where uuid=:uuid`;

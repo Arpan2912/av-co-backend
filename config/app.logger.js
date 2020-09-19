@@ -3,7 +3,7 @@ const winston = require("winston");
 const WinstonDailyRotateFile = require("winston-daily-rotate-file");
 
 const errorStackTracerFormat = winston.format(info => {
-  if (info instanceof Error) {
+  if(info instanceof Error) {
     info.message = ` ${info.stack}`;
   }
   return info;

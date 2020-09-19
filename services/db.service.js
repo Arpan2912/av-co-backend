@@ -43,13 +43,13 @@ module.exports = class DbService {
   static executeSqlQuery(query, replacements, operation, tableName,transaction) {
     return new Promise((resolve, reject) => {
       let queryType;
-      if (operation === "insert") {
+      if(operation === "insert") {
         queryType = Sequelize.QueryTypes.INSERT;
-      } else if (operation === "update") {
+      } else if(operation === "update") {
         queryType = Sequelize.QueryTypes.UPDATE;
-      } else if (operation === "select") {
+      } else if(operation === "select") {
         queryType = Sequelize.QueryTypes.SELECT;
-      } else if (operation === "delete") {
+      } else if(operation === "delete") {
         queryType = Sequelize.QueryTypes.DELETE;
       } else {
         queryType = Sequelize.QueryTypes.SELECT;
@@ -64,7 +64,7 @@ module.exports = class DbService {
       db.sequelize
         .query(query, optinObj)
         .then(data => {
-          // if (
+          // if(
           //   ["insert", "update", "delete"].includes(operation) &&
           //   tableName !== "activity_log"
           // ) {
@@ -109,26 +109,26 @@ module.exports = class DbService {
 
   static insertRecordToDb(replacemenObj, table,transaction) {
     let q = null;
-    if (table === "contact") {
+    if(table === "contact") {
       q = insertContact;
-    } else if (table === "user") {
+    } else if(table === "user") {
       q = createUser;
-    } else if (table === "stock") {
+    } else if(table === "stock") {
       q = insertStock;
-    } else if (table === "transaction") {
+    } else if(table === "transaction") {
       q = insertTransaction;
-    } else if (table === "transaction_history") {
+    } else if(table === "transaction_history") {
       q = insertTransactionHistory;
-    }  else if (table === "stock_history") {
+    }  else if(table === "stock_history") {
       q = insertStockHistory;
-    } else if (table === "opening_balance") {
+    } else if(table === "opening_balance") {
       q = insertOpeningBalance;
-    } else if (table === "user_settings") {
+    } else if(table === "user_settings") {
       q = insertUserSettings;
     }  else {
       return Promise.reject({ msg: "" });
     }
-    if (q === null) {
+    if(q === null) {
       return Promise.reject({ msg: "" });
     }
     return DbService.executeSqlQuery(q, replacemenObj, "insert", table,transaction);
@@ -161,20 +161,20 @@ module.exports = class DbService {
 
   static getIdFromUuid(replacemenObj, table) {
     let q = null;
-    if (table === "contact") {
+    if(table === "contact") {
       q = getContactIdFromUuid;
-    } else if (table === "stock") {
+    } else if(table === "stock") {
       q = getStockIdFromUuid;
-    }  else if (table === "transaction") {
+    }  else if(table === "transaction") {
       q = getTransactionIdFromUuid;
-    } else if (table === "opening_balance") {
+    } else if(table === "opening_balance") {
       q = getOpeningBalanceIdFromUuid;
-    } else if (table === "user_settings") {
+    } else if(table === "user_settings") {
       q = getUserSettingsIdFromUuid;
     } else {
       return Promise.reject({ msg: "" });
     }
-    if (q === null) {
+    if(q === null) {
       return Promise.reject({ msg: "" });
     }
     return DbService.executeSqlQuery(q, replacemenObj, "select");

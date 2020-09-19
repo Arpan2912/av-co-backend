@@ -6,7 +6,20 @@ module.exports = class TransactionController {
     try {
       await TransactionService.addTransactionApi(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "stock added successfully",
+        "Transaction added successfully",
+        null
+      );
+      return res.status(200).send(responseObj);
+    } catch (e) {
+      CommonService.logErrorAndSendResponse(e, res, null);
+    }
+  }
+
+  static async addOtherTransaction(req, res) {
+    try {
+      await TransactionService.addOtherTransaction(req, res);
+      const responseObj = CommonService.prepareSuccessResponse(
+        "Transaction added successfully",
         null
       );
       return res.status(200).send(responseObj);
@@ -20,7 +33,7 @@ module.exports = class TransactionController {
       const contacts = await TransactionService.getTransactions(req, res);
      
       const responseObj = CommonService.prepareSuccessResponse(
-        "Get person successfully",
+        "Get Transaction successfully",
         contacts
       );
       return res.status(200).send(responseObj);
@@ -33,7 +46,7 @@ module.exports = class TransactionController {
     try {
       await TransactionService.updateTransactionApi(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update person successfully",
+        "Update Transaction successfully",
         null
       );
       return res.status(200).send(responseObj);

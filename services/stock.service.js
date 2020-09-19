@@ -120,7 +120,7 @@ module.exports = class StockService {
       } = req.body;
       const { id } = req.userDetail;
 
-      if (!uuid) {
+      if(!uuid) {
         throw { code: 409, msg: "please select stock" };
       }
 
@@ -153,31 +153,31 @@ module.exports = class StockService {
         id: stockMainId
       };
       let historyNote=`Stock ${stockDetail.stock_id}'s `;
-      if (buyPrice && stockDetail.buy_price !== buyPrice) {
+      if(buyPrice && stockDetail.buy_price !== buyPrice) {
         historyNote+= `buy price updated to ${buyPrice} from ${stockDetail.buy_price}`
         updateObj.buy_price = buyPrice;
         updateTransactionObj=true;
       }
-      if (buyDate) {
+      if(buyDate) {
         updateObj.buy_date = buyDate;
       }
-      if (buyPersonId && stockDetail.buy_person_id !== buyPersonId) {
+      if(buyPersonId && stockDetail.buy_person_id !== buyPersonId) {
         historyNote+= `buy person updated to ${buyContactDetail.name}`
         updateObj.buy_person_id = buyPersonId;
         updateTransactionObj=true;
       }
-      if (buyTransactionId) {
+      if(buyTransactionId) {
         updateObj.buy_transaction_id = buyTransactionId;
       }
       if(sellPrice){
         updateObj.sell_price = sellPrice;
         if(stockDetail.sell_transaction_id && stockDetail.sell_price !== sellPrice){
           updateTransactionObj=true;
-        } else if (!stockDetail.sell_transaction_id){
+        } else if(!stockDetail.sell_transaction_id){
           addTransactionObj=true;
         }
       }
-      // if (sellPrice && stockDetail.sell_price !== sellPrice) {
+      // if(sellPrice && stockDetail.sell_price !== sellPrice) {
       //   if(stockDetail.sell_price){
       //     historyNote+= `sell price changed to ${sellPrice}`
       //     updateTransactionObj=true;
@@ -191,7 +191,7 @@ module.exports = class StockService {
         updateObj.weight=weight;
         updateTransactionObj=true;
       }
-      if (sellDate) {
+      if(sellDate) {
         updateObj.sell_date = sellDate;
       }
       if(sellPersonId){
@@ -204,17 +204,17 @@ module.exports = class StockService {
       } else {
         updateObj.sell_person_id = null;
       }
-      // if (sellPersonId && stockDetail.sell_person_id !== sellPersonId) {
+      // if(sellPersonId && stockDetail.sell_person_id !== sellPersonId) {
       //   if(stockDetail.sell_person_id){
       //     historyNote+= `sell person changed to ${sellContactDetail.name}`
       //   }
       //   updateObj.sell_person_id = sellPersonId;
       // }
-      if (status && stockDetail.status !== status) {
+      if(status && stockDetail.status !== status) {
         historyNote+= `status changed to ${status}`
         updateObj.status = status;
       }
-      if (note && stockDetail.note !== note) {
+      if(note && stockDetail.note !== note) {
         historyNote+= `note updated`
         updateObj.note = note;
       }
@@ -330,11 +330,11 @@ module.exports = class StockService {
         status = null;
       }
       page = parseInt(page);
-      if (page === "NaN") {
+      if(page === "NaN") {
         page = 1;
       }
       limit = parseInt(limit);
-      if (limit === "NaN") {
+      if(limit === "NaN") {
         limit = 1;
       }
       const offset = (page - 1) * limit;
@@ -379,7 +379,7 @@ module.exports = class StockService {
       } = req.query;
       const { id } = req.userDetail;
 
-      if (!uuid) {
+      if(!uuid) {
         throw { code: 409, msg: "please select stock" };
       }
 

@@ -17,6 +17,7 @@ module.exports = {
   },
   transaction: {
     addTransaction: "/add-transaction",
+    addOtherTransaction: "/add-other-transaction",
     updateTransaction: "/update-transaction",
     getTransactions: "/get-transactions",
     getCloseAmountForToday: "/get-close-amount-today"
