@@ -22,6 +22,8 @@ module.exports = class StockService {
       sellPersonId=null,
       note=null,
       mode= null,
+      buyPricePer=null,
+      sellPricePer=null
     } = req.body;
     const { id } = req.userDetail;
     const t = await DbService.excuteDbTransaction();
@@ -33,11 +35,15 @@ module.exports = class StockService {
         buyPersonId = contactDetail[0].id;
       }
       let transactionId = null;
+      let amoutToAddInTransaction = buyPrice;
+      if(buyPricePer === 'carat'){
+        amoutToAddInTransaction = buyPrice * weight;
+      }
       const transactionObj={
         uuid:uuidv4(),
         person_id:buyPersonId,
         debit:0,
-        credit: buyPrice * weight,
+        credit: amoutToAddInTransaction,
         note: `Buy Stock No ${stockId}`,
         mode:'stock',
         transaction_date:new Date().toISOString(),
@@ -54,12 +60,14 @@ module.exports = class StockService {
         uuid: uuidv4(),
         stock_id: stockId,
         buy_price:getValueToStore(buyPrice),
+        buy_price_per:getValueToStore(buyPricePer),
         buy_date:getValueToStore(buyDate),
         buy_person_id:getValueToStore(buyPersonId),
         buy_transaction_id:getValueToStore(transactionId),
         weight:getValueToStore(weight),
         status:getValueToStore('current-stock'),
         sell_price:getValueToStore(sellPrice),
+        sell_price_per:getValueToStore(sellPricePer),
         sell_date:getValueToStore(sellDate),
         sell_person_id:null,
         sell_transaction_id:null,
@@ -116,6 +124,8 @@ module.exports = class StockService {
         sellPersonId=null,
         sellTransactionId=null,
         note=null,
+        buyPricePer=null,
+        sellPricePer=null,
         id:uuid
       } = req.body;
       const { id } = req.userDetail;
@@ -158,6 +168,14 @@ module.exports = class StockService {
         updateObj.buy_price = buyPrice;
         updateTransactionObj=true;
       }
+
+      if(buyPricePer && stockDetail.buy_price_per !== buyPricePer) {
+        updateObj.buy_price_per = buyPricePer;
+        historyNote+= `buy price updated to ${buyPrice} from ${stockDetail.buy_price}`
+        updateObj.buy_price = buyPrice;
+        updateTransactionObj=true;
+      }
+
       if(buyDate) {
         updateObj.buy_date = buyDate;
       }
@@ -175,6 +193,15 @@ module.exports = class StockService {
           updateTransactionObj=true;
         } else if(!stockDetail.sell_transaction_id){
           addTransactionObj=true;
+        }
+      }
+
+      if(sellPricePer && stockDetail.sell_price_per !== sellPricePer){
+        updateObj.sell_price_per = sellPricePer;
+        if(!stockDetail.sell_transaction_id){
+          addTransactionObj=true;
+        } else {
+          updateTransactionObj=true;
         }
       }
       // if(sellPrice && stockDetail.sell_price !== sellPrice) {
@@ -221,7 +248,10 @@ module.exports = class StockService {
       if(addTransactionObj === true && status !== 'jangad'){
         let mode = 'stock';
         let credit = 0;
-        let debit = sellPrice * weight;
+        let debit = sellPrice;
+        if(sellPricePer === 'carat'){
+           debit = sellPrice * weight;
+        }
         if(!sellPersonId){
           mode = 'cash';
           credit = debit;
@@ -256,9 +286,12 @@ module.exports = class StockService {
           updated_at:new Date().toISOString(),
           updated_by:id
         }
-        if((buyPrice && stockDetail.buy_price !== buyPrice) || stockDetail.weight != weight){
+        if((buyPrice && stockDetail.buy_price !== buyPrice) || stockDetail.weight != weight || stockDetail.buy_price_per !== buyPricePer){
           updateBuyTransactionObj.id=stockDetail.buy_transaction_id;
-          updateBuyTransactionObj.credit=buyPrice * weight;
+          updateBuyTransactionObj.credit=buyPrice;
+          if(buyPricePer === 'carat'){
+            updateBuyTransactionObj.credit=buyPrice * weight;
+          }
           updateBuyTransactionObj.debit=0;
         }
 
@@ -267,12 +300,18 @@ module.exports = class StockService {
           updateBuyTransactionObj.person_id=buyPersonId;
         }
 
-        if((sellPrice && stockDetail.sell_price !== sellPrice)|| stockDetail.weight != weight){
+        if((sellPrice && stockDetail.sell_price !== sellPrice)|| stockDetail.weight != weight || stockDetail.sell_price_per !== sellPricePer){
           updateSellTransactionObj.id=stockDetail.sell_transaction_id;
-          updateSellTransactionObj.debit=sellPrice * weight;
+          updateSellTransactionObj.debit=sellPrice;
+          if(sellPricePer === 'carat'){
+            updateSellTransactionObj.debit=sellPrice * weight;
+          }
           updateSellTransactionObj.credit=0;
           if(!sellPersonId){
-            updateSellTransactionObj.credit=sellPrice * weight;
+            updateSellTransactionObj.credit=sellPrice;
+            if(sellPricePer === 'carat'){
+              updateSellTransactionObj.credit=sellPrice * weight;
+            }
             updateSellTransactionObj.debit=0;
           } 
         }

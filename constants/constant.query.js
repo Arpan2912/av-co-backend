@@ -91,10 +91,12 @@ module.exports = {
     and is_deleted=false
   `,
   insertStock: `insert into stocks 
-  (uuid,stock_id,buy_price,buy_date,buy_person_id,buy_transaction_id,weight,status,sell_price,sell_date,sell_person_id,sell_transaction_id,note,
+  (uuid,stock_id,buy_price,buy_price_per,buy_date,buy_person_id,buy_transaction_id,
+    weight,status,sell_price,sell_price_per,sell_date,sell_person_id,sell_transaction_id,note,
     is_active,is_deleted,created_at,updated_at,created_by,updated_by) 
     values (
-      :uuid,:stock_id,:buy_price,:buy_date,:buy_person_id,:buy_transaction_id,:weight,:status,:sell_price,:sell_date,:sell_person_id,:sell_transaction_id,:note,
+      :uuid,:stock_id,:buy_price,:buy_price_per,:buy_date,:buy_person_id,:buy_transaction_id,
+      :weight,:status,:sell_price,:sell_price_per,:sell_date,:sell_person_id,:sell_transaction_id,:note,
       :is_active,:is_deleted,:created_at,:updated_at,
       :created_by,:updated_by
     ) returning id`,
@@ -108,6 +110,9 @@ module.exports = {
     // if(replacement.last_name) {
     if(replacement.buy_price) {
       q += `,buy_price=:buy_price`;
+    }
+    if(replacement.buy_price_per) {
+      q += `,buy_price_per=:buy_price_per`;
     }
     if(replacement.buy_date) {
       q += `,buy_date=:buy_date`;
@@ -126,6 +131,9 @@ module.exports = {
     }
     if(replacement.sell_price) {
       q += `,sell_price=:sell_price`;
+    }
+    if(replacement.sell_price_per) {
+      q += `,sell_price_per=:sell_price_per`;
     }
     if(replacement.sell_date) {
       q += `,sell_date=:sell_date`;
@@ -151,8 +159,8 @@ module.exports = {
   
   getStocks: replacement => {
     let q = `select s.uuid as uuid,stock_id,
-    buy_price,buy_date,cb.name as buy_person_name,cb.uuid as buy_person_id,
-    buy_transaction_id,weight,status,sell_price,sell_date,cs.name as sell_person_name,cs.uuid as sell_person_id,
+    buy_price,buy_price_per,buy_date,cb.name as buy_person_name,cb.uuid as buy_person_id,
+    buy_transaction_id,weight,status,sell_price,sell_price_per,sell_date,cs.name as sell_person_name,cs.uuid as sell_person_id,
     sell_transaction_id,note,s.updated_at
     from stocks  as s
     left join contacts as cb on cb.id=s.buy_person_id
@@ -295,25 +303,25 @@ module.exports = {
     },
   
     getTransactionsCount: `select count(*) from transactions as t
-    left join contacts as c on c.id=t.person_id
-    where 
-    (
-      case 
-        when :is_search 
-        then 
-        --upper(stock_id) like upper(:search) or
-           upper(c.name) like upper(:search)
-       else true end
-    ) and
-    case when :person_id is not null then person_id=:person_id else true end
-    and 
-      case 
-        when :mode is not null 
-        then mode=:mode 
-        else true 
-      end
-    and t.is_active=true
-    and t.is_Deleted=false
+      left join contacts as c on c.id=t.person_id
+      where 
+      (
+        case 
+          when :is_search 
+          then 
+          --upper(stock_id) like upper(:search) or
+            upper(c.name) like upper(:search)
+        else true end
+      ) and
+      case when :person_id is not null then person_id=:person_id else true end
+      and 
+        case 
+          when :mode is not null 
+          then mode=:mode 
+          else true 
+        end
+      and t.is_active=true
+      and t.is_Deleted=false
     `,
 
     insertTransactionHistory:`insert into transaction_history
@@ -398,7 +406,11 @@ module.exports = {
     `,
     getStockAndAmountWithDalal:`
       select 
-      contacts.uuid,name,sum(weight) as weight,sum(sell_price::integer * weight) as amount,
+      contacts.uuid,name,sum(weight) as weight,
+      CASE 
+        WHEN sell_price_per='carat' THEN sum(sell_price::integer * weight)
+        ELSE sum(sell_price::integer)
+      END as amount,
       count(*) as "totalStones",
       string_agg(stock_id,',') as stones
       from stocks 
@@ -412,7 +424,7 @@ module.exports = {
       )
       and stocks.is_active=true
       and stocks.is_deleted=false
-      group by sell_person_id,contacts.uuid,name
+      group by sell_person_id,contacts.uuid,name,sell_price_per
       order by name
       offset :offset limit :limit 
     `,
