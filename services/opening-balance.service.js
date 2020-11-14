@@ -1,7 +1,13 @@
 const moment = require("moment");
 const uuidv4 = require("uuidv4");
 const DbService = require("../services/db.service");
-const  { getValueToStore }=require("../services/common.service");
+const CommonService = require("../services/common.service");
+const { getValueToStore } = require("../services/common.service");
+const {
+  headers: {
+    headerCompanyId
+  }
+} = require("../constants/constant.value");
 
 module.exports = class OpeningBalanceService {
 
@@ -11,11 +17,16 @@ module.exports = class OpeningBalanceService {
       note = null
     } = req.body;
     const { id } = req.userDetail;
+    const { [headerCompanyId]: companyUuid } = req.headers;
+
+    const companyDetail = await CommonService.getCompanyDetail(companyUuid);
+    const companyId = companyDetail.id;
     // const date = moment().format('YYYY-MM-DD');
     const obj = {
       uuid: uuidv4(),
-      value:getValueToStore(amount),
-      key:'base_amount',
+      value: getValueToStore(amount),
+      key: 'base_amount',
+      company_id: companyId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: id,
@@ -33,11 +44,11 @@ module.exports = class OpeningBalanceService {
       const {
         amount,
         note = null,
-        openingBalanceId : openingBalanceUuid
+        openingBalanceId: openingBalanceUuid
       } = req.body;
       const { id } = req.userDetail;
 
-      if(!openingBalanceUuid) {
+      if (!openingBalanceUuid) {
         throw { code: 409, msg: "please select opening balance" };
       }
 
@@ -48,9 +59,9 @@ module.exports = class OpeningBalanceService {
       const updateObj = {
         updated_at: new Date().toISOString(),
         updated_by: id,
-        value:amount,
+        value: amount,
         uuid: openingBalanceUuid
-      }; 
+      };
       await DbService.updateUserSetting(updateObj);
       return Promise.resolve();
     } catch (e) {
@@ -59,14 +70,20 @@ module.exports = class OpeningBalanceService {
     }
   }
 
-  static async getTodayOpeningBalance(req){
+  static async getTodayOpeningBalance(req) {
     // const date = moment().format('YYYY-MM-DD');
+    const { [headerCompanyId]: companyUuid } = req.headers;
+
+    const companyDetail = await CommonService.getCompanyDetail(companyUuid);
+    const companyId = companyDetail.id;
+
     const replacementObj = {
-      key:'base_amount'
+      key: 'base_amount',
+      company_id: companyId
     }
     const todayOpeningBalanceResponse = await DbService.getUserSettings(replacementObj);
     console.log(todayOpeningBalanceResponse);
-    if(todayOpeningBalanceResponse && todayOpeningBalanceResponse[0]){
+    if (todayOpeningBalanceResponse && todayOpeningBalanceResponse[0]) {
       return todayOpeningBalanceResponse[0];
     } else {
       return null;
@@ -103,7 +120,7 @@ module.exports = class OpeningBalanceService {
   //       contacts,
   //       count: countObj[0].count
   //     };
-  
+
   //     return Promise.resolve(responseObj);
   //   } catch (e) {
   //     return Promise.reject(e);

@@ -9,6 +9,7 @@ const stockRoutes = require("../routes/stock.route");
 const transactionRoutes = require("../routes/transaction.route");
 const openingBalanceRoutes = require("../routes/opening-balance.route");
 const dashboardRoutes = require("../routes/dashboard.route");
+const companyRoutes = require("../routes/company.route");
 
 const DbService = require("../services/db.service");
 // public key for decrypt token path
@@ -71,6 +72,7 @@ module.exports = class AppRoutes {
     app.use("/transaction", transactionRoutes);
     app.use("/opening-balance", openingBalanceRoutes);
     app.use("/dashboard", dashboardRoutes);
+    app.use("/company", companyRoutes);
 
     app.use(function(err, req, res) {
       if(err.name === "UnauthorizedError") {

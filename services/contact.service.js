@@ -3,33 +3,41 @@ const fs = require("fs");
 const json2xls = require("json2xls");
 
 const DbService = require("../services/db.service");
-const  { getValueToStore }=require("../services/common.service");
-const  CommonService =require("../services/common.service");
-
+const { getValueToStore } = require("../services/common.service");
+const CommonService = require("../services/common.service");
+const {
+  headers: {
+    headerCompanyId
+  }
+} = require("../constants/constant.value");
 module.exports = class ContactService {
   static async addContact(req) {
     const {
       name,
-      email=null,
-      mobile1=null,
-      mobile2=null,
-      address=null,
-      city=null,
-      company=null,
+      email = null,
+      mobile1 = null,
+      mobile2 = null,
+      address = null,
+      city = null,
+      company = null,
       type
     } = req.body;
     const { id } = req.userDetail;
+    const { [headerCompanyId]: companyUuid } = req.headers;
+    const companyDetail = await CommonService.getCompanyDetail(companyUuid);
+    const companyId = companyDetail.id;
 
     const obj = {
       uuid: uuidv4(),
       name: name,
-      email:getValueToStore(email),
-      mobile1:getValueToStore(mobile1),
-      mobile2:getValueToStore(mobile2),
-      address:getValueToStore(address),
-      city:getValueToStore(city),
-      company:getValueToStore(company),
-      type:getValueToStore(type),
+      email: getValueToStore(email),
+      mobile1: getValueToStore(mobile1),
+      mobile2: getValueToStore(mobile2),
+      address: getValueToStore(address),
+      city: getValueToStore(city),
+      company: getValueToStore(company),
+      type: getValueToStore(type),
+      company_id: companyId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: id,
@@ -51,18 +59,18 @@ module.exports = class ContactService {
     try {
       const {
         name,
-        email=null,
-        mobile1=null,
-        mobile2=null,
-        address=null,
-        city=null,
-        company=null,
+        email = null,
+        mobile1 = null,
+        mobile2 = null,
+        address = null,
+        city = null,
+        company = null,
         type,
         contactId: contactUuid = null
       } = req.body;
       const { id } = req.userDetail;
 
-      if(!contactUuid) {
+      if (!contactUuid) {
         throw { code: 409, msg: "please select contact" };
       }
 
@@ -76,32 +84,32 @@ module.exports = class ContactService {
         contact_id: contactId
       };
 
-      if(name) {
+      if (name) {
         updateObj.name = name;
       }
-      if(email) {
+      if (email) {
         updateObj.email = email;
       }
-      if(address) {
+      if (address) {
         updateObj.address = address;
       }
-      if(mobile1) {
+      if (mobile1) {
         updateObj.mobile1 = mobile1;
       }
-      if(mobile2) {
+      if (mobile2) {
         updateObj.mobile2 = mobile2;
       }
-      if(city) {
+      if (city) {
         updateObj.city = city;
       }
-      if(company) {
+      if (company) {
         updateObj.company = company;
       }
-      
-      if(type) {
+
+      if (type) {
         updateObj.type = type;
       }
-      
+
       await DbService.updateContact(updateObj);
       return Promise.resolve();
     } catch (e) {
@@ -112,14 +120,19 @@ module.exports = class ContactService {
 
   static async getContacts(req) {
     try {
-      let { page = "1", limit = "10", search, from = null,downloadExcel="false" } = req.query;
-      let {downloadExcelFields=[]}=req.body;
+      let { page = "1", limit = "10", search, from = null, downloadExcel = "false" } = req.query;
+      let { downloadExcelFields = [] } = req.body;
+      const { [headerCompanyId]: companyUuid } = req.headers;
+
+      const companyDetail = await CommonService.getCompanyDetail(companyUuid);
+      const companyId = companyDetail.id;
+
       page = parseInt(page);
-      if(page === "NaN") {
+      if (page === "NaN") {
         page = 1;
       }
       limit = parseInt(limit);
-      if(limit === "NaN") {
+      if (limit === "NaN") {
         limit = 1;
       }
       const offset = (page - 1) * limit;
@@ -132,7 +145,8 @@ module.exports = class ContactService {
             ? null
             : `%${search}%`,
         is_search: !(search === "" || search === undefined || search === null),
-        download_excel:downloadExcel==='true'?true:false
+        download_excel: downloadExcel === 'true' ? true : false,
+        company_id: companyId
       };
       const contacts = await DbService.getContacts(replacementObj);
       const countObj = await DbService.getContactsCount(replacementObj);
@@ -140,8 +154,8 @@ module.exports = class ContactService {
         contacts,
         count: countObj[0].count
       };
-      if(downloadExcel === 'true'){
-        let excelArray = await ContactService.prepareArrayToGenerateExcel(contacts,downloadExcelFields);
+      if (downloadExcel === 'true') {
+        let excelArray = await ContactService.prepareArrayToGenerateExcel(contacts, downloadExcelFields);
         const uploadPath = `${__dirname}/../public/`;
         const fileName = `${uuidv4().toString()}.xlsx`;
         const xls = json2xls(excelArray);
@@ -156,98 +170,98 @@ module.exports = class ContactService {
     }
   }
 
-  static async prepareArrayToGenerateExcel(data,fieldsToAdd){
-    let excelArr=[];
+  static async prepareArrayToGenerateExcel(data, fieldsToAdd) {
+    let excelArr = [];
     let arrLength = data.length;
-    return new Promise((resolve,reject)=>{
-      if(arrLength===0){
+    return new Promise((resolve, reject) => {
+      if (arrLength === 0) {
         return resolve();
       }
-      for(let i=0;i<data.length;i++){
-        let obj={};
-        let currentData=data[i];
-        if(fieldsToAdd && Array.isArray(fieldsToAdd) && (fieldsToAdd.includes('all')||fieldsToAdd.length===0)){
-          obj['Name']=currentData.name;
-          obj['Mobile']='';
-          if(currentData.mobile1){
-            if(obj['Mobile']){
-              obj['Mobile']=obj['Mobile']+','+currentData.mobile1;
+      for (let i = 0; i < data.length; i++) {
+        let obj = {};
+        let currentData = data[i];
+        if (fieldsToAdd && Array.isArray(fieldsToAdd) && (fieldsToAdd.includes('all') || fieldsToAdd.length === 0)) {
+          obj['Name'] = currentData.name;
+          obj['Mobile'] = '';
+          if (currentData.mobile1) {
+            if (obj['Mobile']) {
+              obj['Mobile'] = obj['Mobile'] + ',' + currentData.mobile1;
             } else {
-              obj['Mobile']=obj['Mobile']+currentData.mobile1;
+              obj['Mobile'] = obj['Mobile'] + currentData.mobile1;
             }
           }
-          if(currentData.mobile2){
-            if(obj['Mobile']){
-              obj['Mobile']=obj['Mobile']+','+currentData.mobile2;
+          if (currentData.mobile2) {
+            if (obj['Mobile']) {
+              obj['Mobile'] = obj['Mobile'] + ',' + currentData.mobile2;
             } else {
-              obj['Mobile']=obj['Mobile']+currentData.mobile2;
+              obj['Mobile'] = obj['Mobile'] + currentData.mobile2;
             }
           }
-          obj['Address']=currentData.address;
+          obj['Address'] = currentData.address;
         } else {
-          if(fieldsToAdd.includes('name')){
-            obj['Name']=currentData.name;
+          if (fieldsToAdd.includes('name')) {
+            obj['Name'] = currentData.name;
           }
-          if(fieldsToAdd.includes('mobile')){
-            obj['Mobile']='';
-            if(currentData.mobile1){
-              if(obj['Mobile']){
-                obj['Mobile']=obj['Mobile']+','+currentData.mobile1;
+          if (fieldsToAdd.includes('mobile')) {
+            obj['Mobile'] = '';
+            if (currentData.mobile1) {
+              if (obj['Mobile']) {
+                obj['Mobile'] = obj['Mobile'] + ',' + currentData.mobile1;
               } else {
-                obj['Mobile']=obj['Mobile']+currentData.mobile1;
+                obj['Mobile'] = obj['Mobile'] + currentData.mobile1;
               }
             }
-            if(currentData.mobile2){
-              if(obj['Mobile']){
-                obj['Mobile']=obj['Mobile']+','+currentData.mobile2;
+            if (currentData.mobile2) {
+              if (obj['Mobile']) {
+                obj['Mobile'] = obj['Mobile'] + ',' + currentData.mobile2;
               } else {
-                obj['Mobile']=obj['Mobile']+currentData.mobile2;
+                obj['Mobile'] = obj['Mobile'] + currentData.mobile2;
               }
             }
           }
-          
+
         }
         excelArr.push(obj);
-        if(i===arrLength-1){
+        if (i === arrLength - 1) {
           return resolve();
         }
       }
     })
-    .then(()=>{
-      return Promise.resolve(excelArr);
-    })
-    .catch(e=>{
-      return Promise.reject(e);
-    })
+      .then(() => {
+        return Promise.resolve(excelArr);
+      })
+      .catch(e => {
+        return Promise.reject(e);
+      })
   }
 
-  static async  uploadExcel(req) {
+  static async uploadExcel(req) {
     const { id: userId } = req.userDetail;
     const json = await CommonService.readFileAndReturnExcelArray(req);
-    console.log("json",json);
-    for(let i=0;i<json.length;i++){
-      let currentData=json[i];
-      let name=null;
-      let lastName=null;
-      let mobile1=null;
-      let mobile2=null;
-      let mobile3=null;
-      let mobile4=null;
-      let address=null;
-      let samaaj=null;
-      let family_members=null;
-      let living=null;
-      let income=null;
-      let additional_detail=null;
-      
+    console.log("json", json);
+    for (let i = 0; i < json.length; i++) {
+      let currentData = json[i];
+      let name = null;
+      let lastName = null;
+      let mobile1 = null;
+      let mobile2 = null;
+      let mobile3 = null;
+      let mobile4 = null;
+      let address = null;
+      let samaaj = null;
+      let family_members = null;
+      let living = null;
+      let income = null;
+      let additional_detail = null;
 
-      if(!currentData['Name']){
+
+      if (!currentData['Name']) {
         console.log("Not find name");
         continue;
       }
 
-      if(currentData['Name']){
-        name=currentData['Name'];
+      if (currentData['Name']) {
+        name = currentData['Name'];
         // let splitName=currentData['Name'].split(" ");
         // if(splitName.length===1){
         //   firstName=splitName[0];
@@ -266,45 +280,45 @@ module.exports = class ContactService {
         // }
       }
 
-      if(currentData['Mobile']){
-        let mobileSplit=currentData['Mobile'].toString().split(',');
-        if(mobileSplit[0]){
-          mobile1=mobileSplit[0].trim() !== ''? mobileSplit[0].trim(): null;
+      if (currentData['Mobile']) {
+        let mobileSplit = currentData['Mobile'].toString().split(',');
+        if (mobileSplit[0]) {
+          mobile1 = mobileSplit[0].trim() !== '' ? mobileSplit[0].trim() : null;
         }
-        if(mobileSplit[1]){
-          mobile2=mobileSplit[1].trim() !== ''? mobileSplit[0].trim(): null;
+        if (mobileSplit[1]) {
+          mobile2 = mobileSplit[1].trim() !== '' ? mobileSplit[0].trim() : null;
         }
-        if(mobileSplit[2]){
-          mobile3=mobileSplit[2].trim() !== ''? mobileSplit[0].trim(): null;
+        if (mobileSplit[2]) {
+          mobile3 = mobileSplit[2].trim() !== '' ? mobileSplit[0].trim() : null;
         }
-        if(mobileSplit[3]){
-          mobile4=mobileSplit[3].trim() !== ''? mobileSplit[0].trim(): null;
+        if (mobileSplit[3]) {
+          mobile4 = mobileSplit[3].trim() !== '' ? mobileSplit[0].trim() : null;
         }
       }
 
-      if(currentData['Address']){
-        address=currentData['Address']
+      if (currentData['Address']) {
+        address = currentData['Address']
       }
-      if(currentData['Members']){
-        family_members=currentData['Members']
+      if (currentData['Members']) {
+        family_members = currentData['Members']
       }
-      if(currentData['Samaaj']){
-        samaaj=currentData['Samaaj']
+      if (currentData['Samaaj']) {
+        samaaj = currentData['Samaaj']
       }
-      if(currentData['Living']){
-        living=currentData['Living']
+      if (currentData['Living']) {
+        living = currentData['Living']
       }
-      if(currentData['Income']){
-        income=currentData['Income']
+      if (currentData['Income']) {
+        income = currentData['Income']
       }
-      if(currentData['Detail']){
-        additional_detail=currentData['Detail']
+      if (currentData['Detail']) {
+        additional_detail = currentData['Detail']
       }
 
-      let replacementObj={
-        uuid:uuidv4(),
+      let replacementObj = {
+        uuid: uuidv4(),
         name,
-        email:null,
+        email: null,
         mobile1,
         mobile2,
         mobile3,
@@ -315,14 +329,14 @@ module.exports = class ContactService {
         living,
         income,
         additional_detail,
-        is_active:true,
-        is_deleted:false,
-        created_by:userId,
-        updated_by:userId,
-        created_at:new Date().toISOString(),
-        updated_at:new Date().toISOString()
+        is_active: true,
+        is_deleted: false,
+        created_by: userId,
+        updated_by: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
-      await DbService.insertRecordToDb(replacementObj,'contact')
+      await DbService.insertRecordToDb(replacementObj, 'contact')
     }
     return;
   }

@@ -36,29 +36,33 @@ const {
   getUserSettings,
   insertUserSettings,
   updateUserSetting,
-  getUserSettingsIdFromUuid
+  getUserSettingsIdFromUuid,
+  getCompanyIdFromUuid,
+  addCompany,
+  updateCompany,
+  getCompanies
 } = require("../constants/constant.query");
 
 module.exports = class DbService {
-  static executeSqlQuery(query, replacements, operation, tableName,transaction) {
+  static executeSqlQuery(query, replacements, operation, tableName, transaction) {
     return new Promise((resolve, reject) => {
       let queryType;
-      if(operation === "insert") {
+      if (operation === "insert") {
         queryType = Sequelize.QueryTypes.INSERT;
-      } else if(operation === "update") {
+      } else if (operation === "update") {
         queryType = Sequelize.QueryTypes.UPDATE;
-      } else if(operation === "select") {
+      } else if (operation === "select") {
         queryType = Sequelize.QueryTypes.SELECT;
-      } else if(operation === "delete") {
+      } else if (operation === "delete") {
         queryType = Sequelize.QueryTypes.DELETE;
       } else {
         queryType = Sequelize.QueryTypes.SELECT;
       }
-      let optinObj = { 
-        replacements, 
+      let optinObj = {
+        replacements,
         type: queryType
       }
-      if(transaction){
+      if (transaction) {
         optinObj.transaction = transaction;
       }
       db.sequelize
@@ -103,35 +107,37 @@ module.exports = class DbService {
     });
   }
 
-  static excuteDbTransaction(){
-    return  db.sequelize.transaction();
+  static excuteDbTransaction() {
+    return db.sequelize.transaction();
   }
 
-  static insertRecordToDb(replacemenObj, table,transaction) {
+  static insertRecordToDb(replacemenObj, table, transaction) {
     let q = null;
-    if(table === "contact") {
+    if (table === "contact") {
       q = insertContact;
-    } else if(table === "user") {
+    } else if (table === "user") {
       q = createUser;
-    } else if(table === "stock") {
+    } else if (table === "stock") {
       q = insertStock;
-    } else if(table === "transaction") {
+    } else if (table === "transaction") {
       q = insertTransaction;
-    } else if(table === "transaction_history") {
+    } else if (table === "transaction_history") {
       q = insertTransactionHistory;
-    }  else if(table === "stock_history") {
+    } else if (table === "stock_history") {
       q = insertStockHistory;
-    } else if(table === "opening_balance") {
+    } else if (table === "opening_balance") {
       q = insertOpeningBalance;
-    } else if(table === "user_settings") {
+    } else if (table === "user_settings") {
       q = insertUserSettings;
-    }  else {
+    } else if (table === "company") {
+      q = addCompany;
+    } else {
       return Promise.reject({ msg: "" });
     }
-    if(q === null) {
+    if (q === null) {
       return Promise.reject({ msg: "" });
     }
-    return DbService.executeSqlQuery(q, replacemenObj, "insert", table,transaction);
+    return DbService.executeSqlQuery(q, replacemenObj, "insert", table, transaction);
   }
 
   static getUserDetail(replacemenObj) {
@@ -161,20 +167,23 @@ module.exports = class DbService {
 
   static getIdFromUuid(replacemenObj, table) {
     let q = null;
-    if(table === "contact") {
+    if (table === "contact") {
       q = getContactIdFromUuid;
-    } else if(table === "stock") {
+    } else if (table === "stock") {
       q = getStockIdFromUuid;
-    }  else if(table === "transaction") {
+    } else if (table === "transaction") {
       q = getTransactionIdFromUuid;
-    } else if(table === "opening_balance") {
+    } else if (table === "opening_balance") {
       q = getOpeningBalanceIdFromUuid;
-    } else if(table === "user_settings") {
+    } else if (table === "user_settings") {
       q = getUserSettingsIdFromUuid;
-    } else {
+    } else if (table === "company") {
+      q = getCompanyIdFromUuid;
+    }
+    else {
       return Promise.reject({ msg: "" });
     }
-    if(q === null) {
+    if (q === null) {
       return Promise.reject({ msg: "" });
     }
     return DbService.executeSqlQuery(q, replacemenObj, "select");
@@ -276,5 +285,16 @@ module.exports = class DbService {
     return DbService.executeSqlQuery(getUserSettings(replacemenObj), replacemenObj, "select");
   }
 
+  static updateCompany(replacemenObj) {
+    return DbService.executeSqlQuery(
+      updateCompany(replacemenObj),
+      replacemenObj,
+      "update",
+      "company"
+    );
+  }
 
+  static getCompanies(replacemenObj = {}) {
+    return DbService.executeSqlQuery(getCompanies, replacemenObj, "select");
+  }
 };

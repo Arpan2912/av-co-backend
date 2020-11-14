@@ -2,18 +2,19 @@ const crypto = require("crypto");
 const csv = require("csvtojson");
 var xlsx = require('xlsx');
 const excelToJson = require('convert-excel-to-json');
-const fs=require("fs");
-const multer=require("multer");
+const fs = require("fs");
+const multer = require("multer");
 const moment = require("moment");
 const AppLogger = require("../config/app.logger");
 const { common } = require("../constants/constant.message");
+const DbService = require("./db.service");
 
 const commonMsg = 'Something went wrong';
 module.exports = class CommonService {
 
-  static fileUploadMiddleware(){
+  static fileUploadMiddleware() {
     const storage = multer.diskStorage({
-      destination:'uploads',
+      destination: 'uploads',
       filename: function (req, file, cb) {
         cb(null, `${file.originalname}`)
       }
@@ -28,17 +29,17 @@ module.exports = class CommonService {
     return csv().fromString(csvData);
   }
 
-  static async readFileAndReturnExcelArray(req){
+  static async readFileAndReturnExcelArray(req) {
     console.log(req.file);
     let workbook = xlsx.readFile(`${__dirname}/../uploads/${req.file.originalname}`);
     let sheet_name_list = workbook.SheetNames;
     let xlData = await xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-    fs.unlink(`${__dirname}/../uploads/${req.file.originalname}`,()=>
+    fs.unlink(`${__dirname}/../uploads/${req.file.originalname}`, () =>
       console.log("file deleted")
     );
     return xlData;
   }
-  
+
   static prepareSuccessResponse(message, data) {
     const obj = {
       data,
@@ -63,7 +64,7 @@ module.exports = class CommonService {
     const code = e.code ? e.code : 500;
     // eslint-disable-next-line no-console
     console.error(e);
-    if(e instanceof Error) {
+    if (e instanceof Error) {
       AppLogger.error(e);
     }
     const errorObj = CommonService.prepareErrorResponse(msg, data);
@@ -78,19 +79,30 @@ module.exports = class CommonService {
       .digest("hex");
   }
 
-  
+  static async getCompanyDetail(companyUuid) {
+    const companyObj = { uuid: companyUuid };
+    let companyDetail = await DbService.getIdFromUuid(companyObj, "company");
+    if (companyDetail && companyDetail[0]) {
+      [companyDetail] = companyDetail;
+    } else {
+      throw { code: 400, msg: "Company not exist" };
+    }
+    return companyDetail;
+  }
 };
 
-function getValueToStore(value){
-  if(value === ''){
-    value=null;
+function getValueToStore(value) {
+  if (value === '') {
+    value = null;
   }
   return value;
-} 
+}
 
-function getTodayDate(){
+function getTodayDate() {
   return moment().format('YYYY-MM-DD');
 }
 
-module.exports.getValueToStore=getValueToStore;
-module.exports.getTodayDate=getTodayDate;
+
+
+module.exports.getValueToStore = getValueToStore;
+module.exports.getTodayDate = getTodayDate;

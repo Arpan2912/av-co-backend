@@ -30,5 +30,10 @@ module.exports = {
   dashboard:{
     getStockAndAmountWithDalal:"/get-stock-and-amount-with-dalal",
     getAccountSummary:"/get-account-summary"
-  }
+  },
+  company : {
+    addCompany: "/add-company",
+    updateCompany: "/update-company",
+    getCompanies: "/get-company",
+  },
 };
