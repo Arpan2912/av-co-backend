@@ -21,7 +21,7 @@ module.exports = class StockController {
       const contacts = await StockService.getStocks(req, res);
      
       const responseObj = CommonService.prepareSuccessResponse(
-        "Get person successfully",
+        "Get stock successfully",
         contacts
       );
       return res.status(200).send(responseObj);
@@ -34,7 +34,7 @@ module.exports = class StockController {
     try {
       await StockService.updateStock(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update person successfully",
+        "Stock updated successfully",
         null
       );
       return res.status(200).send(responseObj);

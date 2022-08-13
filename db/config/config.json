@@ -2,7 +2,7 @@
   "development": {
     "username": "arpan",
     "password": "123",
-    "database": "stock",
+    "database": "av_co_account",
     "host": "localhost",
     "dialect": "postgres"
   },

@@ -46,7 +46,7 @@ module.exports = class TransactionController {
     try {
       await TransactionService.updateTransactionApi(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update Transaction successfully",
+        "Transaction updated successfully",
         null
       );
       return res.status(200).send(responseObj);

@@ -6,10 +6,10 @@ Stock :
 
 
 
-  ENV's
+ENV's
 
 DB_NAME=stock
 DB_USERNAME=arpan
 DB_PASSWORD=123
 DB_HOST=localhost
-DB_DIALECT=postges
+DB_DIALECT=postgres

@@ -6,7 +6,7 @@ module.exports = class ContactController {
     try {
       await ContactService.addContact(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Person added successfully",
+        "Contact added successfully",
         null
       );
       return res.status(200).send(responseObj);
@@ -20,7 +20,7 @@ module.exports = class ContactController {
       const contacts = await ContactService.getContacts(req, res);
      
       const responseObj = CommonService.prepareSuccessResponse(
-        "Get person successfully",
+        "Get contact successfully",
         contacts
       );
       return res.status(200).send(responseObj);
@@ -33,7 +33,7 @@ module.exports = class ContactController {
     try {
       await ContactService.updateContact(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update person successfully",
+        "Contact updated successfully",
         null
       );
       return res.status(200).send(responseObj);

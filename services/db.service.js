@@ -44,67 +44,31 @@ const {
 } = require("../constants/constant.query");
 
 module.exports = class DbService {
-  static executeSqlQuery(query, replacements, operation, tableName, transaction) {
-    return new Promise((resolve, reject) => {
-      let queryType;
-      if (operation === "insert") {
-        queryType = Sequelize.QueryTypes.INSERT;
-      } else if (operation === "update") {
-        queryType = Sequelize.QueryTypes.UPDATE;
-      } else if (operation === "select") {
-        queryType = Sequelize.QueryTypes.SELECT;
-      } else if (operation === "delete") {
-        queryType = Sequelize.QueryTypes.DELETE;
-      } else {
-        queryType = Sequelize.QueryTypes.SELECT;
-      }
-      let optinObj = {
-        replacements,
-        type: queryType
-      }
-      if (transaction) {
-        optinObj.transaction = transaction;
-      }
-      db.sequelize
-        .query(query, optinObj)
-        .then(data => {
-          // if(
-          //   ["insert", "update", "delete"].includes(operation) &&
-          //   tableName !== "activity_log"
-          // ) {
-          //   const replacemenObj = {
-          //     u_uuid: uuidv4(),
-          //     replacement: JSON.stringify(replacements),
-          //     table_name: tableName,
-          //     result: JSON.stringify(data),
-          //     operation,
-          //     created_at: new Date().toISOString(),
-          //     updated_at: new Date().toISOString(),
-          //     created_by: replacements.updated_by
-          //       ? replacements.updated_by
-          //       : null,
-          //     updated_by: replacements.updated_by
-          //       ? replacements.updated_by
-          //       : null
-          //   };
-          //   // try {
-          //   //   DbService.executeSqlQuery(
-          //   //     insertActivityLog,
-          //   //     replacemenObj,
-          //   //     "insert",
-          //   //     "activity_log"
-          //   //   );
-          //   // } catch (e) {
-          //   //   console.error("e", e);
-          //   // }
-          // }
-          return resolve(data);
-        })
-        .catch(err => {
-          console.error("err", err);
-          return reject(err);
-        });
-    });
+  static async executeSqlQuery(query, replacements, operation, tableName, transaction) {
+    // return new Promise((resolve, reject) => {
+    let queryType;
+    if (operation === "insert") {
+      queryType = Sequelize.QueryTypes.INSERT;
+    } else if (operation === "update") {
+      queryType = Sequelize.QueryTypes.UPDATE;
+    } else if (operation === "select") {
+      queryType = Sequelize.QueryTypes.SELECT;
+    } else if (operation === "delete") {
+      queryType = Sequelize.QueryTypes.DELETE;
+    } else {
+      queryType = Sequelize.QueryTypes.SELECT;
+    }
+    let optinObj = {
+      replacements,
+      type: queryType
+    }
+    if (transaction) {
+      optinObj.transaction = transaction;
+    }
+
+    return db.sequelize
+      .query(query, optinObj)
+    // });
   }
 
   static excuteDbTransaction() {
@@ -132,10 +96,10 @@ module.exports = class DbService {
     } else if (table === "company") {
       q = addCompany;
     } else {
-      return Promise.reject({ msg: "" });
+      return Promise.reject({ msg: "........" });
     }
     if (q === null) {
-      return Promise.reject({ msg: "" });
+      return Promise.reject({ msg: "....." });
     }
     return DbService.executeSqlQuery(q, replacemenObj, "insert", table, transaction);
   }

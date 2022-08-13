@@ -19,7 +19,7 @@ module.exports = class OpeningBalanceController {
     try {
       await OpeningBalanceService.updateOpeningBalance(req);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update opening balance successfully",
+        "Opening balance updated successfully",
         null
       );
       return res.status(200).send(responseObj);

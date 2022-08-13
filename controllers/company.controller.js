@@ -33,7 +33,7 @@ module.exports = class CompanyController {
     try {
       await CompanyService.updateCompany(req, res);
       const responseObj = CommonService.prepareSuccessResponse(
-        "Update Transaction successfully",
+        "Company detail updated successfully",
         null
       );
       return res.status(200).send(responseObj);
