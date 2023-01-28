@@ -18,9 +18,9 @@ module.exports = class AuthService {
     };
     const userDetails = await DbService.getUserDetail(replacement);
 
-    if(userDetails.length > 0) {
+    if (userDetails.length > 0) {
       user = userDetails[0];
-      if(user.is_deleted === true) {
+      if (user.is_deleted === true) {
         throw { code: 409, msg: "User is deleted by admin" };
       } else {
         throw { code: 409, msg: "User already exist" };
@@ -51,22 +51,21 @@ module.exports = class AuthService {
       phone
     };
     const userDetail = await DbService.getUserDetail(replacement);
-
-    if(userDetail.length === 0) {
+    if (userDetail.length === 0) {
       throw { code: 409, msg: "User not exist" };
     }
     user = userDetail[0];
 
-    if(user.is_deleted === true) {
+    if (user.is_deleted === true) {
       throw { code: 409, msg: "User is deleted" };
     }
 
-    if(user.is_active === false) {
+    if (user.is_active === false) {
       throw { code: 409, msg: "User is inactive" };
     }
 
     const passwordHash = await CommonService.generateSha512Hash(password);
-    if(passwordHash === user.password) {
+    if (passwordHash === user.password) {
       const jwtObj = {
         firstName: user.first_name,
         lastName: user.last_name,
